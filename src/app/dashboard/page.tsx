@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { fetchFilmData, deleteFilmData } from '@/lib/api';
-import { Plus, Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard } from 'lucide-react';
+import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard } from 'lucide-react';
 import { FilmModal } from '@/components/ui/FilmModal';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { useFilters } from '@/context/FilterContext';
@@ -44,7 +44,7 @@ export default function DashboardPage() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ rowIndex: number, id: number } | null>(null);
 
-  const loadData = async (isSilent = false) => {
+  const loadData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     else showToast('Sinkronisasi data...', 'info');
 
@@ -62,14 +62,14 @@ export default function DashboardPage() {
       }
     }
     setLoading(false);
-  };
+  }, [showToast]);
 
   useEffect(() => {
     loadData();
     // Tutup hint setelah 6 detik
     const timer = setTimeout(() => setShowHint(false), 6000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     // Apply filters and sorting

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Loader2, Clapperboard, Link as LinkIcon, Layers, Activity, Hash, Calendar, Edit2, PlusCircle, ChevronDown } from 'lucide-react';
+import { X, Loader2, Clapperboard, Link as LinkIcon, Layers, Activity, Hash, Calendar, Edit2, PlusCircle, ChevronDown, type LucideIcon } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { saveFilmData } from '@/lib/api';
 import type { Film } from '@/app/dashboard/page';
@@ -10,7 +10,7 @@ interface CustomSelectProps {
   value: string;
   onChange: (value: string) => void;
   options: { label: string; value: string }[];
-  icon: any;
+  icon: LucideIcon;
 }
 
 function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProps) {

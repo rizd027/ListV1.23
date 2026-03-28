@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogOut, Clapperboard, Search, SlidersHorizontal,
-  ChevronDown, User, X, LayoutGrid, List, ArrowLeft, LayoutList
+  ChevronDown, User, X, LayoutGrid, List, ArrowLeft
 } from 'lucide-react';
 import { FilterProvider, useFilters } from '@/context/FilterContext';
 
@@ -136,7 +137,7 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
         <div className="relative w-5 h-5 rounded-lg flex items-center justify-center overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
           {avatar ? (
-            <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+            <Image src={avatar} alt="Avatar" width={20} height={20} className="w-full h-full object-cover" />
           ) : (
             <span className="text-[9px] font-black text-white">{initials}</span>
           )}
@@ -162,7 +163,7 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
                 <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center flex-none shadow-lg shadow-indigo-500/20 overflow-hidden"
                   style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
                   {avatar ? (
-                    <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    <Image src={avatar} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-xs md:text-sm font-black text-white">{initials}</span>
                   )}

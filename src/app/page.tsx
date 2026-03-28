@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogIn, UserPlus, Eye, EyeOff, Loader2, Clapperboard, User, Lock, Film, PlayCircle, MonitorPlay, Star } from 'lucide-react';
+import Image from 'next/image';
+import { Eye, EyeOff, Loader2, Clapperboard, User, Lock, Film, PlayCircle, MonitorPlay, Star } from 'lucide-react';
 import { Outfit } from 'next/font/google';
 import { loginAppScript } from '@/lib/api';
 
 const outfit = Outfit({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
+const MotionImage = motion(Image);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -92,15 +94,18 @@ export default function LoginPage() {
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden bg-black/20">
         <div className="absolute inset-0 z-0">
           <AnimatePresence mode='wait'>
-            <motion.img
+            <MotionImage
               key={currentImageIndex}
               src={`/assets/PNG_Preview/a${currentImageIndex}.png`}
               alt="Preview"
+              width={1000}
+              height={1000}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
               className="absolute inset-0 w-full h-full object-cover object-center"
+              priority
             />
           </AnimatePresence>
         </div>
@@ -114,10 +119,12 @@ export default function LoginPage() {
       <div className="lg:hidden absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-40">
            <AnimatePresence mode='wait'>
-            <motion.img
+            <MotionImage
               key={currentImageIndex}
               src={`/assets/PNG_Preview/a${currentImageIndex}.png`}
               alt="Background"
+              width={500}
+              height={500}
               transition={{ duration: 1.5 }}
               className="absolute inset-0 w-full h-full object-cover object-center"
             />

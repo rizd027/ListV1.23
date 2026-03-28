@@ -1,5 +1,5 @@
 export const CONFIG = {
-  SHEET_API_URL: 'https://script.google.com/macros/s/AKfycbwY2NPLitV_Q8dVTz7cmOX17B5eSr8kgnNPpxmvkiFFbBKbnud33Yru9dmtWs_8iPKV/exec',
+  SHEET_API_URL: process.env.NEXT_PUBLIC_SHEET_API_URL || 'https://script.google.com/macros/s/AKfycbwY2NPLitV_Q8dVTz7cmOX17B5eSr8kgnNPpxmvkiFFbBKbnud33Yru9dmtWs_8iPKV/exec',
 };
 
 export async function loginAppScript(user: string, pass: string, isRegister = false) {

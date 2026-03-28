@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import NextImage from 'next/image';
 import { Pencil, Camera, Loader2, Save, Shield, Film, Tv, MonitorPlay, Video, Clapperboard } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { updateUserProfile } from '@/lib/api';
@@ -157,7 +158,7 @@ export default function ProfilePage() {
       } else {
         showToast(res.message || 'Gagal tersinkron.', 'error');
       }
-    } catch (err) {
+    } catch {
       showToast('Gagal terhubung dengan server Google.', 'error');
     } finally {
       setSaving(false);
@@ -231,7 +232,7 @@ export default function ProfilePage() {
                 onClick={() => fileInputRef.current?.click()}
               >
                 {avatar ? (
-                  <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <NextImage src={avatar} alt="Avatar" width={110} height={110} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl md:text-3xl font-black bg-gradient-to-br from-indigo-900 to-slate-900 text-indigo-200">
                     {initials}
