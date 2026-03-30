@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import { AlertCircle, X } from 'lucide-react';
 
 interface AlertModalProps {
@@ -16,78 +15,91 @@ interface AlertModalProps {
 }
 
 export const AlertModal = ({
-  isOpen,
-  title,
-  message,
-  onConfirm,
-  onCancel,
-  confirmText = 'Hapus',
-  cancelText = 'Batal',
-  type = 'danger'
+  isOpen, title, message, onConfirm, onCancel,
+  confirmText = 'Hapus', cancelText = 'Batal', type = 'danger'
 }: AlertModalProps) => {
+  const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(() => setVisible(true), 10);
+      return () => clearTimeout(t);
+    } else {
+      setVisible(false);
+    }
+  }, [isOpen]);
+
+  if (!mounted) return null;
+
+  const confirmColor = type === 'danger'
+    ? 'bg-rose-600 hover:bg-rose-500'
+    : type === 'warning'
+    ? 'bg-amber-600 hover:bg-amber-500'
+    : 'bg-indigo-600 hover:bg-indigo-500';
+
+  const iconColor = type === 'danger' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500';
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-24 md:pt-32">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={onCancel}
-          />
-          
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            className="relative w-full max-w-sm bg-[#0f141f] border border-white/5 rounded-3xl p-6 shadow-2xl overflow-hidden"
-          >
-            {/* Background Glow */}
-            <div className={`absolute -top-24 -right-24 w-48 h-48 blur-[80px] opacity-20 pointer-events-none
-              ${type === 'danger' ? 'bg-rose-500' : type === 'warning' ? 'bg-amber-500' : 'bg-indigo-500'}`} 
-            />
+    <div
+      className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+      style={{
+        pointerEvents: isOpen ? 'auto' : 'none',
+        visibility: isOpen || visible ? 'visible' : 'hidden', // to hide focus correctly
+        transition: 'visibility 0s linear',
+        transitionDelay: isOpen ? '0s' : '0.2s' // delay hide by 200ms when closing
+      }}
+    >
+      {/* Backdrop — dark only, no blur */}
+      <div
+        className="absolute inset-0 transition-opacity duration-200"
+        style={{ background: 'rgba(0,0,0,0.7)', opacity: visible ? 1 : 0 }}
+        onClick={onCancel}
+      />
 
-            <div className="flex flex-col items-center text-center">
-              <div className={`p-4 rounded-2xl mb-4 ${type === 'danger' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                <AlertCircle size={32} />
-              </div>
-              
-              <h3 className="text-xl font-black text-white mb-2">{title}</h3>
-              <p className="text-sm font-medium text-gray-400 mb-8 leading-relaxed">
-                {message}
-              </p>
-              
-              <div className="flex w-full gap-3">
-                <button
-                  onClick={onCancel}
-                  className="flex-1 h-12 rounded-2xl bg-white/5 border border-white/5 text-sm font-bold text-gray-400 hover:bg-white/10 hover:text-white transition-all"
-                >
-                  {cancelText}
-                </button>
-                <button
-                  onClick={() => {
-                    onConfirm();
-                    onCancel();
-                  }}
-                  className={`flex-1 h-12 rounded-2xl text-sm font-bold text-white transition-all shadow-lg
-                    ${type === 'danger' ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-rose-900/20' : 
-                      'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-indigo-900/20'}`}
-                >
-                  {confirmText}
-                </button>
-              </div>
-            </div>
+      {/* Panel */}
+      <div
+        className="relative w-full max-w-[340px] rounded-2xl overflow-hidden transition-all duration-200"
+        style={{
+          background: '#0f1220',
+          border: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: '0 20px 48px rgba(0,0,0,0.7)',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(8px)',
+        }}
+      >
+        <button
+          onClick={onCancel}
+          className="absolute top-3 right-3 p-1.5 rounded-lg text-gray-600 hover:text-white hover:bg-white/[0.06] transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
 
-            <button 
+        <div className="flex flex-col items-center text-center px-6 pt-8 pb-6">
+          <div className={`p-3.5 rounded-2xl mb-4 ${iconColor}`}>
+            <AlertCircle className="w-7 h-7" />
+          </div>
+          <h3 className="text-lg font-black text-white mb-2">{title}</h3>
+          <p className="text-sm text-gray-400 mb-6 leading-relaxed">{message}</p>
+
+          <div className="flex w-full gap-2.5">
+            <button
               onClick={onCancel}
-              className="absolute top-4 right-4 p-2 rounded-xl text-gray-600 hover:text-white hover:bg-white/5 transition-all"
+              className="flex-1 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/[0.08] transition-colors"
             >
-              <X size={20} />
+              {cancelText}
             </button>
-          </motion.div>
+            <button
+              onClick={() => { onConfirm(); onCancel(); }}
+              className={`flex-1 h-10 rounded-xl text-sm font-bold text-white transition-colors ${confirmColor}`}
+            >
+              {confirmText}
+            </button>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

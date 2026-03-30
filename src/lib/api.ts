@@ -2,6 +2,20 @@ export const CONFIG = {
   SHEET_API_URL: process.env.NEXT_PUBLIC_SHEET_API_URL || 'https://script.google.com/macros/s/AKfycbwY2NPLitV_Q8dVTz7cmOX17B5eSr8kgnNPpxmvkiFFbBKbnud33Yru9dmtWs_8iPKV/exec',
 };
 
+export interface Film {
+  id: number;
+  title: string;
+  cast?: string;
+  type: string;
+  episodes: number | null;
+  status: string;
+  date: string | null;
+  notes: string;
+  link?: string;
+  count?: number;
+  rowIndex: number;
+}
+
 export async function loginAppScript(user: string, pass: string, isRegister = false) {
   const action = isRegister ? 'register' : 'login';
   const cleanUser = user.replace(/[^a-z0-9]/g, '_');
