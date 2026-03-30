@@ -372,7 +372,12 @@ function MobileBottomBar({
         >
           <div className={`relative px-4 py-2 rounded-2xl transition-all duration-300 ${profileOpen ? 'bg-indigo-500/10' : ''}`}>
             <User className={`w-6 h-6 transition-colors duration-300 ${profileOpen ? 'text-indigo-400' : 'text-white/40'}`} strokeWidth={2.5} />
-            {profileOpen && <motion.div layoutId="nav-dot" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)]" />}
+            {profileOpen && (
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] md:hidden block" />
+            )}
+            {profileOpen && (
+              <motion.div layoutId="nav-dot" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] hidden md:block" />
+            )}
           </div>
           <span className={`text-[11px] font-black uppercase tracking-wider transition-colors duration-300 ${profileOpen ? 'text-indigo-400' : 'text-white/20'}`}>
             Akun
@@ -393,7 +398,12 @@ function MobileBottomBar({
                   {activeFilterCount}
                 </span>
               )}
-              {filterOpen && <motion.div layoutId="nav-dot" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)]" />}
+              {filterOpen && (
+                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] md:hidden block" />
+              )}
+              {filterOpen && (
+                <motion.div layoutId="nav-dot" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] hidden md:block" />
+              )}
             </div>
             <span className={`text-[11px] font-black uppercase tracking-wider transition-colors duration-300 ${filterOpen ? 'text-indigo-400' : 'text-white/20'}`}>
               Filter

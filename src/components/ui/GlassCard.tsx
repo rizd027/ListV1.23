@@ -20,6 +20,21 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
       return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    if (isMobile) {
+      return (
+        <div
+          ref={ref as any}
+          className={cn(
+            "glass-card rounded-2xl p-6 overflow-hidden md:p-8 w-full",
+            className
+          )}
+          {...(props as any)}
+        >
+          {children}
+        </div>
+      );
+    }
+
     return (
       <motion.div
         ref={ref}
@@ -27,10 +42,10 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           "glass-card rounded-2xl p-6 overflow-hidden md:p-8 w-full",
           className
         )}
-        initial={isMobile ? undefined : { opacity: 0, y: 20 }}
-        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-        exit={isMobile ? undefined : { opacity: 0, y: -20 }}
-        transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: "easeOut" }}
+        initial={undefined}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         {...props}
       >
         {children}

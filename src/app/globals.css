@@ -31,11 +31,11 @@ body {
 
 @layer utilities {
   .glass {
-    @apply bg-glass-gradient backdrop-blur-md md:backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0, 0, 0, 0.36)];
+    @apply bg-[#0b1120] border border-white/10 md:bg-glass-gradient md:backdrop-blur-xl md:shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
   }
 
   .glass-card {
-    @apply bg-dark-800/60 backdrop-blur-md md:backdrop-blur-xl border border-white/10;
+    @apply bg-[#0f172a] border border-white/10 md:bg-dark-800/60 md:backdrop-blur-xl;
   }
 }
 
@@ -46,9 +46,12 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background-image:
-    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+  background-image: none;
+  @media (min-width: 768px) {
+    background-image:
+      radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+  }
   pointer-events: none;
 }
 
