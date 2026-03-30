@@ -336,10 +336,11 @@ function MobileBottomBar({
         {filterOpen && isDashboard && (
           <motion.div
             ref={filterRef}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="absolute bottom-[calc(100%+8px)] left-4 right-4 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden backdrop-blur-2xl bg-[#0d121f]/95 p-5 space-y-5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute bottom-[calc(100%+8px)] left-4 right-4 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden backdrop-blur-md md:backdrop-blur-2xl bg-[#0d121f]/95 p-5 space-y-5"
           >
             <ChipGroup label="Kategori Produk" items={['Semua Kategori','Film','Donghua','Anime','Series']} value={typeFilter} onChange={setTypeFilter} />
             <div className="h-px bg-white/[0.03]" />
@@ -360,7 +361,7 @@ function MobileBottomBar({
       {/* ── Bottom Navigation Bar ── */}
       <nav className="relative px-3 pb-safe-offset-4 pt-3 flex items-center justify-between gap-1 overflow-visible">
         {/* Background Layer */}
-        <div className="absolute inset-0 z-[-1] bg-[#0b0f1a]/80 backdrop-blur-3xl border-t border-white/5 rounded-t-[32px] md:hidden" 
+        <div className="absolute inset-0 z-[-1] bg-[#0b0f1a]/80 backdrop-blur-xl border-t border-white/5 rounded-t-[32px] md:hidden" 
              style={{ boxShadow: '0 -10px 40px rgba(0,0,0,0.6)' }} />
 
         {/* Tab: Profil */}
@@ -545,7 +546,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
         className="sticky top-0 z-40 w-full border-b border-blue-900/40"
         style={{
           background: 'rgba(11,17,32,0.88)',
-          backdropFilter: 'blur(20px)',
+          backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(8px)' : 'blur(20px)',
         }}
       >
         <div className="max-w-[1550px] mx-auto px-3 md:px-6">

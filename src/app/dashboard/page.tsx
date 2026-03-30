@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { fetchFilmData, deleteFilmData, Film } from '@/lib/api';
-import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard, RefreshCw } from 'lucide-react';
+import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard, RefreshCw, ChevronDown } from 'lucide-react';
 import { FilmModal } from '@/components/ui/FilmModal';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { useFilters } from '@/context/FilterContext';
@@ -24,6 +24,15 @@ export default function DashboardPage() {
     search, typeFilter, sortBy, statusFilter, setStatusFilter, viewMode, addModalOpen, setAddModalOpen,
     films, setFilms, loadingFilms, setLoadingFilms, dataFetched, setDataFetched
   } = useFilters();
+
+  // Optimasi Performa Mobile: Pagination Sederhana (Virtualisasi Manual)
+  const ITEMS_PER_PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+
+  // Reset pagination saat filter / navigasi berubah
+  useEffect(() => {
+    setVisibleCount(ITEMS_PER_PAGE);
+  }, [typeFilter, sortBy, statusFilter, search]);
 
   // Modal — sinkronkan dengan addModalOpen dari context (dipakai mobile bottom bar)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -144,7 +153,7 @@ export default function DashboardPage() {
   const memoizedGridView = useMemo(() => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-5">
-        {filteredData.map((film, index) => {
+        {filteredData.slice(0, visibleCount).map((film, index) => {
           return (
             <div
               key={film.id}
@@ -233,11 +242,11 @@ export default function DashboardPage() {
         })}
       </div>
     );
-  }, [filteredData, handleEditClick, handleDeleteClick]);
+  }, [filteredData, visibleCount, handleEditClick, handleDeleteClick]);
 
   const memoizedTableView = useMemo(() => {
     return (
-      <div className="overflow-x-auto w-full">
+      <div className="overflow-x-auto w-full pb-8">
         <table className="w-full text-left border-collapse min-w-[900px]">
           <thead>
             <tr className="bg-white/[0.02] border-b border-white/5 text-gray-500 text-[10px] font-bold uppercase tracking-[0.15em]">
@@ -253,7 +262,7 @@ export default function DashboardPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {filteredData.map((film, index) => (
+            {filteredData.slice(0, visibleCount).map((film, index) => (
               <tr
                 key={film.id}
                 className={`border-b border-white/[0.02] last:border-0 hover:bg-white/[0.02] transition-colors ${index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.01]'}`}
@@ -318,7 +327,12 @@ export default function DashboardPage() {
         </table>
       </div>
     );
-  }, [filteredData, handleEditClick, handleDeleteClick]);
+  }, [filteredData, visibleCount, handleEditClick, handleDeleteClick]);
+
+  // Load More Handler
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + ITEMS_PER_PAGE);
+  };
 
   return (
     <div className="space-y-4">
@@ -386,6 +400,19 @@ export default function DashboardPage() {
               ) : (
                 <div>
                   {memoizedTableView}
+                </div>
+              )}
+              
+              {/* Load More Button */}
+              {visibleCount < filteredData.length && (
+                <div className="flex justify-center mt-2 mb-8 md:mb-10 w-full relative z-20">
+                  <button
+                    onClick={handleLoadMore}
+                    className="px-6 py-2.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[11px] md:text-sm font-bold tracking-wider uppercase hover:bg-indigo-500/20 transition-all active:scale-95 flex items-center gap-2"
+                  >
+                    Tampilkan Lebih Banyak
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 </div>
               )}
             </>

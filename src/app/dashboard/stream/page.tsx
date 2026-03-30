@@ -138,20 +138,24 @@ export default function StreamPage() {
         
         {/* Dynamic Background Icons */}
         <div className="absolute inset-0 opacity-[0.03]">
-          {[...Array(12)].map((_, i) => {
+          {(typeof window !== 'undefined' && window.innerWidth < 768 ? [...Array(4)] : [...Array(12)]).map((_, i) => {
             const IconList = [PlayCircle, Film, Tv, MonitorPlay, Video, Clapperboard, Link2];
             const Icon = IconList[i % IconList.length];
-            const top = (i * 17 + 7) % 100;
-            const left = (i * 23 + 13) % 100;
-            const duration = 15 + (i % 5) * 5;
-            const delay = i * 0.7;
+            const top = (i * 25 + 10) % 100;
+            const left = (i * 30 + 15) % 100;
+            const duration = 20 + (i % 5) * 5;
+            const delay = i * 1;
+            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
             return (
               <motion.div
                 key={i}
                 className="absolute text-indigo-400"
                 style={{ top: `${top}%`, left: `${left}%` }}
-                animate={{
+                animate={isMobile ? {
+                  y: [0, -20, 0],
+                  opacity: [0.15, 0.3, 0.15],
+                } : {
                   y: [0, -30, 0],
                   x: [0, 20, 0],
                   rotate: [0, 15, -15, 0],
@@ -159,13 +163,13 @@ export default function StreamPage() {
                   scale: [1, 1.1, 1],
                 }}
                 transition={{
-                  duration,
+                  duration: isMobile ? duration * 1.5 : duration,
                   repeat: Infinity,
                   ease: "easeInOut",
                   delay,
                 }}
               >
-                <Icon size={30 + (i % 3) * 15} />
+                <Icon size={isMobile ? 24 : 30 + (i % 3) * 15} />
               </motion.div>
             );
           })}

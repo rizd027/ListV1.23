@@ -11,6 +11,15 @@ interface GlassCardProps extends HTMLMotionProps<"div"> {
 
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ children, className, ...props }, ref) => {
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+      const checkMobile = () => setIsMobile(window.innerWidth < 768);
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     return (
       <motion.div
         ref={ref}
@@ -18,10 +27,10 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           "glass-card rounded-2xl p-6 overflow-hidden md:p-8 w-full",
           className
         )}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
+        exit={isMobile ? undefined : { opacity: 0, y: -20 }}
+        transition={isMobile ? { duration: 0 } : { duration: 0.4, ease: "easeOut" }}
         {...props}
       >
         {children}
