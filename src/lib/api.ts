@@ -7,7 +7,7 @@ export interface Film {
   title: string;
   cast?: string;
   type: string;
-  episodes: number | null;
+  episodes: string | number | null;
   status: string;
   date: string | null;
   notes: string;

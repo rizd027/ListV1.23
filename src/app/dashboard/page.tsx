@@ -4,11 +4,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { fetchFilmData, deleteFilmData, Film } from '@/lib/api';
-import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard, RefreshCw, ChevronDown } from 'lucide-react';
+import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard, RefreshCw, ChevronDown, WifiOff } from 'lucide-react';
 import { FilmModal } from '@/components/ui/FilmModal';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { useFilters } from '@/context/FilterContext';
 import { useToast } from '@/context/ToastContext';
+import { pushOfflineAction, syncOfflineData, getOfflineQueue } from '@/lib/sync';
 
 // Interface Film is imported from @/lib/api
 
@@ -20,9 +21,10 @@ export default function DashboardPage() {
   const { showToast } = useToast();
 
   // Filters dan Data dari context
-  const { 
+  const {
     search, typeFilter, sortBy, statusFilter, setStatusFilter, viewMode, addModalOpen, setAddModalOpen,
-    films, setFilms, loadingFilms, setLoadingFilms, dataFetched, setDataFetched
+    films, setFilms, loadingFilms, setLoadingFilms, dataFetched, setDataFetched,
+    isOnline, isSyncing, setIsSyncing
   } = useFilters();
 
   // Optimasi Performa Mobile: Pagination Sederhana (Virtualisasi Manual)
@@ -52,6 +54,12 @@ export default function DashboardPage() {
   const [itemToDelete, setItemToDelete] = useState<{ rowIndex: number, id: number } | null>(null);
 
   const loadData = useCallback(async (isSilent = false) => {
+    if (!isOnline) {
+      if (!isSilent) setLoadingFilms(false);
+      setDataFetched(true);
+      return;
+    }
+
     if (!isSilent) setLoadingFilms(true);
     else showToast('Mulai menyinkronkan data...', 'info');
 
@@ -75,11 +83,32 @@ export default function DashboardPage() {
     if (!dataFetched) {
       loadData();
     }
-    
+
+    // Auto Sync ketika onlie
+    if (isOnline && dataFetched && !isSyncing) {
+      const queue = getOfflineQueue();
+      if (queue.length > 0) {
+        setIsSyncing(true);
+        const user = localStorage.getItem('film_username')!;
+        const pass = localStorage.getItem('film_password')!;
+        syncOfflineData(user, pass)
+          .then(success => {
+            if (success) {
+               showToast('Data offline berhasil tersinkronisasi!', 'success');
+               loadData(true);
+            } else {
+               showToast('Gagal menyinkronkan sebagian data', 'warning');
+            }
+          })
+          .catch(() => {})
+          .finally(() => setIsSyncing(false));
+      }
+    }
+
     // Tutup hint setelah 6 detik
     const timer = setTimeout(() => setShowHint(false), 6000);
     return () => clearTimeout(timer);
-  }, [dataFetched, loadData]);
+  }, [dataFetched, loadData, isOnline, isSyncing, setIsSyncing, showToast]);
 
   useEffect(() => {
     // Apply filters and sorting
@@ -116,14 +145,25 @@ export default function DashboardPage() {
     const prevData = [...films];
     setFilms(films.filter(f => f.id !== id));
 
-    try {
-      await deleteFilmData(rowIndex, user, pass);
-      showToast('Film berhasil dihapus', 'success');
-      loadData(true);
-    } catch {
-      showToast('Gagal menghapus film', 'error');
-      setFilms(prevData);
-    } finally {
+    if (isOnline) {
+      try {
+        await deleteFilmData(rowIndex, user, pass);
+        showToast('Film berhasil dihapus', 'success');
+        loadData(true);
+      } catch {
+        showToast('Gagal menghapus film', 'error');
+        setFilms(prevData);
+      } finally {
+        setItemToDelete(null);
+      }
+    } else {
+      // OFFLINE MODE
+      pushOfflineAction({
+         type: 'delete',
+         rowIndex,
+         tempId: id
+      });
+      showToast('Film dihapus secara lokal', 'success');
       setItemToDelete(null);
     }
   };
@@ -195,11 +235,11 @@ export default function DashboardPage() {
                   <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Status</span>
                   <span className={`inline-block px-2 py-1 md:px-2.5 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black tracking-wider uppercase
                     ${film.status === 'Selesai' ? 'bg-emerald-500/10 text-emerald-500' :
-                      film.status === 'Sedang Ditonton' ? 'bg-amber-500/10 text-amber-500' :
+                      film.status === 'Watching' ? 'bg-amber-500/10 text-amber-500' :
                         film.status === 'Rencana' ? 'bg-blue-500/10 text-blue-500' :
                           'bg-red-500/10 text-red-500'}`}
                   >
-                    {film.status === 'Sedang Ditonton' ? 'Watching' : film.status}
+                    {film.status === 'Watching' ? 'Watching' : film.status}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -279,11 +319,11 @@ export default function DashboardPage() {
                 <td className="px-3 py-3">
                   <span className={`px-2 py-0.5 rounded-md text-[9px] font-black tracking-widest uppercase border
                     ${film.status === 'Selesai' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                      film.status === 'Sedang Ditonton' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                      film.status === 'Watching' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                         film.status === 'Rencana' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                           'bg-red-500/10 text-red-400 border-red-500/20'}`}
                   >
-                    {film.status === 'Sedang Ditonton' ? 'Watching' : film.status}
+                    {film.status === 'Watching' ? 'Watching' : film.status}
                   </span>
                 </td>
                 <td className="px-3 py-3 text-[11px] font-semibold text-gray-400">
@@ -336,6 +376,36 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
+      {/* Offline Banner */}
+      {!isOnline && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-[20px] p-4 flex items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-500">
+              <WifiOff className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[13px] md:text-sm font-bold text-amber-500 leading-tight">Anda Sedang Offline</p>
+              <p className="text-[10px] md:text-[11px] text-amber-500/80 mt-0.5">Perubahan otomatis disimpan ke perangkat dan disinkron saat online.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Syncing Banner */}
+      {isSyncing && (
+        <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-[20px] p-4 flex items-center justify-between gap-3 shadow-lg shadow-indigo-500/5">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400">
+              <RefreshCw className="w-5 h-5 animate-spin" />
+            </div>
+            <div>
+              <p className="text-[13px] md:text-sm font-bold text-indigo-400 leading-tight">Menyinkronkan Data...</p>
+              <p className="text-[10px] md:text-[11px] text-indigo-400/80 mt-0.5">Menerapkan perubahan offline Anda ke server.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
         {[
@@ -362,13 +432,13 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              
+
               {/* Subtle background icon for depth */}
               <stat.Icon className={`absolute -right-2 -bottom-2 w-14 h-14 ${stat.color} opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-700 -rotate-12`} />
-              
+
               {/* Decorative accent for active state */}
               {isActive && (
-                <motion.div 
+                <motion.div
                   layoutId="active-nav-bg"
                   className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none"
                 />
@@ -402,7 +472,7 @@ export default function DashboardPage() {
                   {memoizedTableView}
                 </div>
               )}
-              
+
               {/* Load More Button */}
               {visibleCount < filteredData.length && (
                 <div className="flex justify-center mt-2 mb-8 md:mb-10 w-full relative z-20">
@@ -439,17 +509,17 @@ export default function DashboardPage() {
 
       {/* FAB — desktop only */}
       <motion.div ref={dragRef} className="fixed inset-0 pointer-events-none z-40 hidden md:block" />
-      
+
       <motion.button
         drag
         dragConstraints={dragRef}
         dragElastic={0.05}
         dragMomentum={true}
-        dragTransition={{ 
-          power: 0.4, 
-          bounceStiffness: 600, 
+        dragTransition={{
+          power: 0.4,
+          bounceStiffness: 600,
           bounceDamping: 60,
-          timeConstant: 200 
+          timeConstant: 200
         }}
         onPointerDown={() => {
           isDragging.current = false;

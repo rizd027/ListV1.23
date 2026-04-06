@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useTransition } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useTransition } from 'react';
 import { Film } from '@/lib/api';
 
 interface FilterState {
@@ -22,6 +22,9 @@ interface FilterState {
   setLoadingFilms: (v: boolean) => void;
   dataFetched: boolean;
   setDataFetched: (v: boolean) => void;
+  isOnline: boolean;
+  isSyncing: boolean;
+  setIsSyncing: (v: boolean) => void;
 }
 
 const FilterContext = createContext<FilterState | null>(null);
@@ -36,7 +39,41 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [films, setFilms] = useState<Film[]>([]);
   const [loadingFilms, setLoadingFilms] = useState(true);
   const [dataFetched, setDataFetched] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsOnline(navigator.onLine);
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+
+      const cached = localStorage.getItem('film_data_cache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.length > 0) {
+            setFilms(parsed);
+          }
+        } catch (e) {}
+      }
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (films.length > 0) {
+      localStorage.setItem('film_data_cache', JSON.stringify(films));
+    }
+  }, [films]);
 
   const setViewMode = (v: 'list' | 'grid') => {
     startTransition(() => {
@@ -55,6 +92,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       films, setFilms,
       loadingFilms, setLoadingFilms,
       dataFetched, setDataFetched,
+      isOnline, isSyncing, setIsSyncing
     }}>
       {children}
     </FilterContext.Provider>

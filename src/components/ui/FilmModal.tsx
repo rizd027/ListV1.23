@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { X, Loader2, Clapperboard, Link as LinkIcon, Layers, Activity, Hash, Calendar, Edit2, PlusCircle, ChevronDown, type LucideIcon } from 'lucide-react';
 import { saveFilmData } from '@/lib/api';
 import type { Film } from '@/lib/api';
+import { useFilters } from '@/context/FilterContext';
+import { pushOfflineAction } from '@/lib/sync';
 
 /* ── Custom Select (CSS-only, no motion) ── */
 interface CustomSelectProps {
@@ -56,11 +58,10 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
             key={option.value}
             type="button"
             onClick={() => { onChange(option.value); setOpen(false); }}
-            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
-              value === option.value
-                ? 'bg-indigo-500/20 text-indigo-300'
-                : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
-            }`}
+            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${value === option.value
+              ? 'bg-indigo-500/20 text-indigo-300'
+              : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+              }`}
           >
             {option.label}
           </button>
@@ -75,11 +76,11 @@ const TIPE_OPTIONS = [
   { label: 'Donghua', value: 'Donghua' },
   { label: 'Movie', value: 'Movie' },
   { label: 'Series', value: 'Series' },
-  { label: 'Dorama', value: 'Dorama' },
+  { label: 'Drama', value: 'Drama' },
 ];
 
 const STATUS_OPTIONS = [
-  { label: 'Watching', value: 'Sedang Ditonton' },
+  { label: 'Watching', value: 'Watching' },
   { label: 'Selesai', value: 'Selesai' },
   { label: 'Rencana', value: 'Rencana' },
   { label: 'Ditunda', value: 'Ditunda' },
@@ -94,12 +95,15 @@ interface FilmModalProps {
 }
 
 export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalProps) {
+  const { isOnline, films, setFilms } = useFilters();
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState<Partial<Film>>({
     title: '', type: 'Anime', cast: '', link: '', episodes: null, status: 'Rencana', date: '', notes: ''
   });
+  const [watched, setWatched] = useState('');
+  const [totalEps, setTotalEps] = useState('');
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -120,11 +124,22 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
         ...filmToEdit,
         date: filmToEdit.date ? new Date(filmToEdit.date).toISOString().split('T')[0] : ''
       });
+      const epsStr = String(filmToEdit.episodes || '');
+      if (epsStr.includes('/')) {
+        const parts = epsStr.split('/');
+        setWatched(parts[0].trim() === '?' || parts[0].trim() === '~' ? '' : parts[0].trim());
+        setTotalEps(parts[1].trim() === '?' || parts[1].trim() === '~' ? '' : parts[1].trim());
+      } else {
+        setWatched(epsStr);
+        setTotalEps('');
+      }
     } else {
       setFormData({
         title: '', type: 'Anime', cast: '', link: '', episodes: null, status: 'Rencana',
         date: new Date().toISOString().split('T')[0], notes: ''
       });
+      setWatched('');
+      setTotalEps('');
     }
   }, [filmToEdit, isOpen]);
 
@@ -144,23 +159,57 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
     const user = localStorage.getItem('film_username')!;
     const pass = localStorage.getItem('film_password')!;
     const action = filmToEdit ? 'edit' : 'add';
+
+    let combinedEps: string | null = null;
+    if (watched && totalEps) combinedEps = `${watched} / ${totalEps}`;
+    else if (watched) combinedEps = `${watched} / ?`;
+    else if (totalEps) combinedEps = `? / ${totalEps}`;
+
     const dataToSave = {
       ...formData,
+      episodes: combinedEps,
       id: filmToEdit ? filmToEdit.id : undefined,
       rowIndex: filmToEdit ? filmToEdit.rowIndex : undefined,
     };
-    try {
-      await saveFilmData(dataToSave, action, user, pass);
+
+    if (isOnline) {
+      try {
+        await saveFilmData(dataToSave, action, user, pass);
+        onSuccess();
+        onClose();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : 'Gagal menyimpan data');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Mode Offline
+      const newId = filmToEdit ? filmToEdit.id : -Date.now();
+      const offlineAction = {
+        type: action as 'edit' | 'add',
+        data: { ...dataToSave, id: newId },
+        rowIndex: dataToSave.rowIndex,
+        tempId: filmToEdit ? filmToEdit.id : newId
+      };
+      
+      pushOfflineAction(offlineAction);
+
+      // Pembaruan UI Optimis
+      if (action === 'add') {
+        const appended = { ...dataToSave, id: newId } as Film;
+        setFilms([...films, appended]);
+      } else {
+        setFilms(films.map(f => f.id === filmToEdit!.id ? { ...f, ...dataToSave } as Film : f));
+      }
+      
       onSuccess();
       onClose();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Gagal menyimpan data');
-    } finally {
       setLoading(false);
     }
   };
 
   const inputCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg pl-8 pr-2.5 py-2 text-[11px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium";
+  const inputNoIconCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg px-2.5 py-2 text-[11px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium text-center";
   const textareaCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg px-2.5 py-2 text-[11px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium resize-none";
   const labelCls = "text-[9px] font-bold text-gray-500 uppercase tracking-widest ml-0.5 block mb-1";
 
@@ -269,7 +318,18 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                 <label className={labelCls}>Status <span className="text-red-400">*</span></label>
                 <CustomSelect
                   value={formData.status as string}
-                  onChange={v => setFormData({ ...formData, status: v })}
+                  onChange={v => {
+                    setFormData({ ...formData, status: v });
+                    if (v === 'Selesai') {
+                      if (!totalEps && watched) {
+                        setTotalEps(watched);
+                      }
+                    } else {
+                      if (totalEps && totalEps === watched) {
+                        setTotalEps('');
+                      }
+                    }
+                  }}
                   options={STATUS_OPTIONS}
                   icon={Activity}
                 />
@@ -280,14 +340,25 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className={labelCls}>Episode</label>
-                <div className="relative">
-                  <Hash className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-indigo-400/60 pointer-events-none" />
-                  <input
-                    type="number" min="1" placeholder="Total"
-                    value={formData.episodes || ''}
-                    onChange={e => setFormData({ ...formData, episodes: parseInt(e.target.value) || null })}
-                    className={inputCls}
-                  />
+                <div className="flex items-center gap-1.5">
+                  <div className="relative flex-1">
+                    <Hash className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-indigo-400/60 pointer-events-none" />
+                    <input
+                      type="number" min="0" placeholder="Tonton"
+                      value={watched}
+                      onChange={e => setWatched(e.target.value)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <span className="text-gray-500 font-bold text-[10px]">/</span>
+                  <div className="relative flex-1">
+                    <input
+                      type="number" min="0" placeholder="Total"
+                      value={totalEps}
+                      onChange={e => setTotalEps(e.target.value)}
+                      className={inputNoIconCls}
+                    />
+                  </div>
                 </div>
               </div>
               <div>

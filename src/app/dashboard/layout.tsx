@@ -296,10 +296,11 @@ function MobileBottomBar({
         {profileOpen && (
           <motion.div
             ref={profileRef}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="absolute bottom-[calc(100%+8px)] left-4 w-56 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden backdrop-blur-2xl bg-[#0d121f]/95"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            className="absolute bottom-[calc(100%+8px)] left-4 w-56 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#0a0d14]"
           >
             <div className="px-5 pt-5 pb-3.5 border-b border-white/[0.05] flex items-center gap-3.5">
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden ring-2 ring-indigo-500/20 shadow-inner"
@@ -336,11 +337,11 @@ function MobileBottomBar({
         {filterOpen && isDashboard && (
           <motion.div
             ref={filterRef}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute bottom-[calc(100%+8px)] left-4 right-4 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden backdrop-blur-md md:backdrop-blur-2xl bg-[#0d121f]/95 p-5 space-y-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            className="absolute bottom-[calc(100%+8px)] left-4 right-4 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#0a0d14] p-5 space-y-5"
           >
             <ChipGroup label="Kategori Produk" items={['Semua Kategori','Film','Donghua','Anime','Series']} value={typeFilter} onChange={setTypeFilter} />
             <div className="h-px bg-white/[0.03]" />
