@@ -10,6 +10,7 @@ import {
   ChevronDown, User, X, LayoutGrid, List, ArrowLeft, FolderPlus, Link2
 } from 'lucide-react';
 import { FilterProvider, useFilters } from '@/context/FilterContext';
+import { SyncStatusBadge } from '@/components/ui/SyncStatusBadge';
 
 /* ── Filter Dropdown ─────────────────────────────────────── */
 function FilterDropdown() {
@@ -269,17 +270,17 @@ function MobileBottomBar({
   const ChipGroup = ({ label, items, value, onChange }: {
     label: string; items: string[]; value: string; onChange: (v: string) => void;
   }) => (
-    <div>
-      <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.15em] mb-2">{label}</p>
+    <div className="space-y-1.5">
+      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{label}</p>
       <div className="flex flex-wrap gap-1.5">
         {items.map(v => {
           const active = value === v;
           const lbl = v.replace('Semua Kategori', 'Semua').replace('Semua Status', 'Semua');
           return (
             <button key={v} onClick={() => onChange(v)}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all duration-200 border ${active
-                ? 'bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
-                : 'bg-white/[0.03] border-white/[0.05] text-gray-500 active:bg-white/[0.08]'
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all border ${active
+                ? 'bg-indigo-500 border-indigo-500 text-white shadow-sm'
+                : 'bg-white/[0.03] border-white/[0.06] text-gray-400 hover:text-white active:bg-white/[0.08]'
               }`}>
               {lbl}
             </button>
@@ -290,44 +291,45 @@ function MobileBottomBar({
   );
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100]">
+    <div className="md:hidden fixed bottom-5 left-4 right-4 z-[100] max-w-[480px] mx-auto">
       {/* ── Popups ── */}
       <AnimatePresence>
         {profileOpen && (
           <motion.div
             ref={profileRef}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            className="absolute bottom-[calc(100%+8px)] left-4 w-56 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#0a0d14]"
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute bottom-[calc(100%+12px)] left-0 w-60 rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-1.5"
           >
-            <div className="px-5 pt-5 pb-3.5 border-b border-white/[0.05] flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden ring-2 ring-indigo-500/20 shadow-inner"
-                style={{ background: 'linear-gradient(135deg,#6366f1,#a855f7)' }}>
+            <div className="px-4 py-3.5 border-b border-white/[0.05] flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10"
+                style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
                 {avatar
-                  ? <Image src={avatar} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />
-                  : <span className="text-xs font-black text-white">{initials}</span>}
+                  ? <Image src={avatar} alt="Avatar" width={32} height={32} className="w-full h-full object-cover" />
+                  : <span className="text-[10px] font-black text-white">{initials}</span>}
               </div>
               <div className="min-w-0">
-                <p className="text-[13px] font-black text-white truncate">{username}</p>
-                <p className="text-[10px] text-gray-400 font-medium truncate">{bio || 'Premium User'}</p>
+                <p className="text-[12px] font-bold text-white truncate">{username}</p>
+                <p className="text-[9px] text-gray-400 truncate mt-0.5">{bio || 'Premium User'}</p>
               </div>
             </div>
-            <div className="p-2 space-y-1">
+            <div className="p-1 space-y-0.5">
               <Link href="/dashboard/profile" onClick={() => setProfileOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[11px] font-bold text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]">
-                <User className="w-4 h-4 text-indigo-400" strokeWidth={2.5} />
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]">
+                <User className="w-4 h-4 text-gray-400" strokeWidth={2} />
                 Edit Profil
               </Link>
               <Link href="/dashboard/stream" onClick={() => setProfileOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[11px] font-bold text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]">
-                <Link2 className="w-4 h-4 text-purple-400" strokeWidth={2.5} />
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]">
+                <Link2 className="w-4 h-4 text-gray-400" strokeWidth={2} />
                 Link Stream
               </Link>
+              <div className="h-px bg-white/[0.05] my-1 mx-2" />
               <button onClick={() => { setProfileOpen(false); onLogout(); }}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[11px] font-bold text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all active:scale-[0.98]">
-                <LogOut className="w-4 h-4 text-red-400" strokeWidth={2.5} />
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-semibold text-red-400/90 hover:bg-red-500/10 transition-all active:scale-[0.98]">
+                <LogOut className="w-4 h-4 text-red-400" strokeWidth={2} />
                 Log Keluar
               </button>
             </div>
@@ -337,21 +339,21 @@ function MobileBottomBar({
         {filterOpen && isDashboard && (
           <motion.div
             ref={filterRef}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            className="absolute bottom-[calc(100%+8px)] left-4 right-4 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#0a0d14] p-5 space-y-5"
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute bottom-[calc(100%+12px)] left-0 right-0 rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-5 space-y-4"
           >
             <ChipGroup label="Kategori Produk" items={['Semua Kategori','Film','Donghua','Anime','Series']} value={typeFilter} onChange={setTypeFilter} />
-            <div className="h-px bg-white/[0.03]" />
+            <div className="h-px bg-white/[0.04]" />
             <ChipGroup label="Urut Berdasarkan" items={['ID A-Z','ID Z-A','Judul A-Z','Judul Z-A']} value={sortBy} onChange={setSortBy} />
-            <div className="h-px bg-white/[0.03]" />
+            <div className="h-px bg-white/[0.04]" />
             <ChipGroup label="Status Nonton" items={['Semua Status','Selesai','Watching','Rencana','Ditunda']} value={statusFilter} onChange={setStatusFilter} />
             
             <button 
               onClick={() => { setTypeFilter('Semua Kategori'); setSortBy('ID A-Z'); setStatusFilter('Semua Status'); setFilterOpen(false); }}
-              className="w-full pt-2 text-[10px] font-black text-indigo-400/60 uppercase tracking-widest text-center active:scale-95 transition-transform"
+              className="w-full pt-1.5 text-[10px] font-bold text-indigo-400/80 uppercase tracking-widest text-center hover:text-indigo-400 transition-colors active:scale-95"
             >
               Hapus Semua Filter
             </button>
@@ -360,29 +362,27 @@ function MobileBottomBar({
       </AnimatePresence>
 
       {/* ── Bottom Navigation Bar ── */}
-      <nav className="relative px-3 pb-safe-offset-4 pt-3 flex items-center justify-between gap-1 overflow-visible">
-        {/* Background Layer */}
-        <div className="absolute inset-0 z-[-1] bg-[#0b0f1a]/80 backdrop-blur-xl border-t border-white/5 rounded-t-[32px] md:hidden" 
-             style={{ boxShadow: '0 -10px 40px rgba(0,0,0,0.6)' }} />
-
+      <nav className="relative px-3 py-2 flex items-center justify-between gap-1.5 rounded-2xl bg-[#090D1A]/90 backdrop-blur-lg border border-white/[0.08] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.7)]">
+        
         {/* Tab: Profil */}
         <button
           ref={profileBtnRef}
           onClick={() => { setProfileOpen(o => !o); setFilterOpen(false); }}
-          className="flex-1 flex flex-col items-center justify-center gap-1.5 py-1.5 active:scale-90 transition-transform duration-200"
+          className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
         >
-          <div className={`relative px-4 py-2 rounded-2xl transition-all duration-300 ${profileOpen ? 'bg-indigo-500/10' : ''}`}>
-            <User className={`w-6 h-6 transition-colors duration-300 ${profileOpen ? 'text-indigo-400' : 'text-white/40'}`} strokeWidth={2.5} />
-            {profileOpen && (
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] md:hidden block" />
-            )}
-            {profileOpen && (
-              <motion.div layoutId="nav-dot" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] hidden md:block" />
-            )}
+          {profileOpen && (
+            <motion.div
+              layoutId="activeTabPill"
+              className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded-xl z-0"
+              transition={{ type: "spring", stiffness: 450, damping: 32 }}
+            />
+          )}
+          <div className="relative z-10 flex flex-col items-center">
+            <User className={`w-5 h-5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-gray-400'}`} strokeWidth={2} />
+            <span className={`text-[9px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-gray-500'}`}>
+              Profil
+            </span>
           </div>
-          <span className={`text-[11px] font-black uppercase tracking-wider transition-colors duration-300 ${profileOpen ? 'text-indigo-400' : 'text-white/20'}`}>
-            Akun
-          </span>
         </button>
 
         {/* Tab: Filter */}
@@ -390,25 +390,28 @@ function MobileBottomBar({
           <button
             ref={filterBtnRef}
             onClick={() => { setFilterOpen(o => !o); setProfileOpen(false); }}
-            className="flex-1 flex flex-col items-center justify-center gap-1.5 py-1.5 active:scale-90 transition-transform duration-200"
+            className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
-            <div className={`relative px-4 py-2 rounded-2xl transition-all duration-300 ${filterOpen ? 'bg-indigo-500/10' : ''}`}>
-              <SlidersHorizontal className={`w-6 h-6 transition-colors duration-300 ${filterOpen ? 'text-indigo-400' : 'text-white/40'}`} strokeWidth={2.5} />
-              {activeFilterCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-indigo-500 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-[#0b0f1a]">
-                  {activeFilterCount}
-                </span>
-              )}
-              {filterOpen && (
-                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] md:hidden block" />
-              )}
-              {filterOpen && (
-                <motion.div layoutId="nav-dot" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)] hidden md:block" />
-              )}
+            {filterOpen && (
+              <motion.div
+                layoutId="activeTabPill"
+                className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded-xl z-0"
+                transition={{ type: "spring", stiffness: 450, damping: 32 }}
+              />
+            )}
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="relative">
+                <SlidersHorizontal className={`w-5 h-5 transition-colors duration-200 ${filterOpen ? 'text-indigo-400' : 'text-gray-400'}`} strokeWidth={2} />
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-indigo-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center ring-1 ring-[#090D1A]">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[9px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${filterOpen ? 'text-indigo-400' : 'text-gray-500'}`}>
+                Filter
+              </span>
             </div>
-            <span className={`text-[11px] font-black uppercase tracking-wider transition-colors duration-300 ${filterOpen ? 'text-indigo-400' : 'text-white/20'}`}>
-              Filter
-            </span>
           </button>
         )}
 
@@ -416,14 +419,16 @@ function MobileBottomBar({
         {isDashboard && (
           <button
             onClick={() => { setAddModalOpen(true); setProfileOpen(false); setFilterOpen(false); }}
-            className="flex-1 flex flex-col items-center justify-center gap-1.5 py-1.5 active:scale-90 transition-transform duration-200"
+            className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
-            <div className="relative px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-              <FolderPlus className="w-6 h-6 text-indigo-400" strokeWidth={2.5} />
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="p-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                <FolderPlus className="w-5 h-5" strokeWidth={2} />
+              </div>
+              <span className="text-[9px] font-semibold tracking-wide mt-0.5 text-indigo-400/90">
+                Tambah
+              </span>
             </div>
-            <span className="text-[11px] font-black uppercase tracking-wider text-indigo-400">
-              Tambah
-            </span>
           </button>
         )}
 
@@ -431,34 +436,34 @@ function MobileBottomBar({
         {isDashboard && (
           <button
             onClick={handleToggleView}
-            className="flex-1 flex flex-col items-center justify-center gap-1.5 py-1.5 active:scale-90 transition-transform duration-150"
+            className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
             aria-label="Toggle view mode"
           >
-            <div className="relative px-4 py-2 rounded-2xl">
-              {/* Grid icon */}
-              <LayoutGrid
-                className="w-6 h-6 text-white/40 absolute inset-0 m-auto transition-[opacity,transform] duration-150"
-                style={{
-                  opacity: localViewMode === 'list' ? 1 : 0,
-                  transform: localViewMode === 'list' ? 'rotate(0deg) scale(1)' : 'rotate(90deg) scale(0.6)',
-                  pointerEvents: 'none',
-                }}
-                strokeWidth={2.5}
-              />
-              {/* List icon */}
-              <List
-                className="w-6 h-6 text-indigo-400 transition-[opacity,transform] duration-150"
-                style={{
-                  opacity: localViewMode === 'grid' ? 1 : 0,
-                  transform: localViewMode === 'grid' ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.6)',
-                  pointerEvents: 'none',
-                }}
-                strokeWidth={2.5}
-              />
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="relative w-5 h-5 flex items-center justify-center">
+                {/* Grid icon */}
+                <LayoutGrid
+                  className="w-5 h-5 text-gray-400 absolute transition-all duration-200"
+                  style={{
+                    opacity: localViewMode === 'list' ? 1 : 0,
+                    transform: localViewMode === 'list' ? 'rotate(0deg) scale(1)' : 'rotate(90deg) scale(0.6)',
+                  }}
+                  strokeWidth={2}
+                />
+                {/* List icon */}
+                <List
+                  className="w-5 h-5 text-gray-400 absolute transition-all duration-200"
+                  style={{
+                    opacity: localViewMode === 'grid' ? 1 : 0,
+                    transform: localViewMode === 'grid' ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.6)',
+                  }}
+                  strokeWidth={2}
+                />
+              </div>
+              <span className="text-[9px] font-semibold tracking-wide mt-0.5 text-gray-500">
+                Layout
+              </span>
             </div>
-            <span className={`text-[11px] font-black uppercase tracking-wider transition-colors duration-150 ${localViewMode === 'grid' ? 'text-indigo-400' : 'text-white/20'}`}>
-              Layout
-            </span>
           </button>
         )}
 
@@ -467,14 +472,25 @@ function MobileBottomBar({
           <button
             ref={profileBtnRef}
             onClick={() => { setProfileOpen(o => !o); }}
-            className="flex-1 flex flex-col items-center justify-center gap-1.5 py-1.5 active:scale-90 transition-transform duration-200"
+            className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
-             <div className="w-6 h-6 rounded-lg overflow-hidden ring-2 ring-white/10" style={{ background: 'linear-gradient(135deg,#6366f1,#a855f7)' }}>
-                {avatar
-                  ? <Image src={avatar} alt="av" width={24} height={24} className="w-full h-full object-cover" />
-                  : <span className="flex items-center justify-center text-[9px] font-black text-white">{initials}</span>}
+             {profileOpen && (
+               <motion.div
+                 layoutId="activeTabPill"
+                 className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded-xl z-0"
+                 transition={{ type: "spring", stiffness: 450, damping: 32 }}
+               />
+             )}
+             <div className="relative z-10 flex flex-col items-center">
+               <div className="w-5 h-5 rounded-md overflow-hidden ring-1 ring-white/10" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                  {avatar
+                    ? <Image src={avatar} alt="av" width={20} height={20} className="w-full h-full object-cover" />
+                    : <span className="flex items-center justify-center text-[8px] font-bold text-white">{initials}</span>}
+               </div>
+               <span className={`text-[9px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-gray-500'}`}>
+                 Profil
+               </span>
              </div>
-             <span className="text-[11px] font-black uppercase tracking-wider text-white/20">Profil</span>
           </button>
         )}
       </nav>
@@ -596,6 +612,9 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             {/* ── Header Actions ── */}
             {isDashboard ? (
               <>
+                {/* ── Sync Status Badge ── */}
+                <SyncStatusBadge />
+
                 {/* ── Divider ── */}
                 <div className="hidden sm:block w-px h-4 bg-white/10 flex-none" />
 
