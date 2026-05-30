@@ -1,13 +1,13 @@
 {
   "name": "listv-next",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --experimental-https --experimental-https-key ./certificates/localhost-key.pem --experimental-https-cert ./certificates/localhost.pem",
     "build": "next build && workbox generateSW workbox-config.js",
     "build:sw": "workbox generateSW workbox-config.js",
     "build:pwa": "next build && workbox generateSW workbox-config.js",
-    "start": "serve out",
+    "start": "serve out --ssl-cert ./certificates/localhost.pem --ssl-key ./certificates/localhost-key.pem",
     "lint": "next lint"
   },
   "dependencies": {
@@ -23,10 +23,8 @@
     "@types/node": "^20",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "concurrently": "^10.0.0",
     "eslint": "^10.1.0",
     "eslint-config-next": "^16.2.1",
-    "local-ssl-proxy": "^2.0.5",
     "postcss": "^8",
     "serve": "^14.2.6",
     "tailwindcss": "^3.4.1",

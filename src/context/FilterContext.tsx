@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useTransition } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useTransition, Dispatch, SetStateAction } from 'react';
 import { Film } from '@/lib/api';
 
 interface FilterState {
@@ -17,7 +17,7 @@ interface FilterState {
   addModalOpen: boolean;
   setAddModalOpen: (v: boolean) => void;
   films: Film[];
-  setFilms: (films: Film[]) => void;
+  setFilms: Dispatch<SetStateAction<Film[]>>;
   loadingFilms: boolean;
   setLoadingFilms: (v: boolean) => void;
   dataFetched: boolean;

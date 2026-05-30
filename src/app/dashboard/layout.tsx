@@ -7,10 +7,10 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogOut, Clapperboard, Search, SlidersHorizontal,
-  ChevronDown, User, X, LayoutGrid, List, ArrowLeft, FolderPlus, Link2
+  ChevronDown, User, X, LayoutGrid, List, ArrowLeft, FolderPlus, Link2, Loader2
 } from 'lucide-react';
 import { FilterProvider, useFilters } from '@/context/FilterContext';
-import { SyncStatusBadge } from '@/components/ui/SyncStatusBadge';
+import { useSyncEngine } from '@/context/SyncContext';
 
 /* ── Filter Dropdown ─────────────────────────────────────── */
 function FilterDropdown() {
@@ -295,12 +295,8 @@ function MobileBottomBar({
       {/* ── Popups ── */}
       <AnimatePresence>
         {profileOpen && (
-          <motion.div
+          <div
             ref={profileRef}
-            initial={{ opacity: 0, y: 12, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.96 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-0 w-60 rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-1.5"
           >
             <div className="px-4 py-3.5 border-b border-white/[0.05] flex items-center gap-3">
@@ -333,16 +329,12 @@ function MobileBottomBar({
                 Log Keluar
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {filterOpen && isDashboard && (
-          <motion.div
+          <div
             ref={filterRef}
-            initial={{ opacity: 0, y: 12, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.96 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-[calc(100%+12px)] left-0 right-0 rounded-2xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-5 space-y-4"
           >
             <ChipGroup label="Kategori Produk" items={['Semua Kategori','Film','Donghua','Anime','Series']} value={typeFilter} onChange={setTypeFilter} />
@@ -357,7 +349,7 @@ function MobileBottomBar({
             >
               Hapus Semua Filter
             </button>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -509,6 +501,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const { search, setSearch, viewMode, setViewMode } = useFilters();
+  const { isOnline, isSyncing, pendingCount } = useSyncEngine();
 
   // Show header on scroll up, hide on scroll down
   useEffect(() => {
@@ -585,11 +578,27 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 <div className="relative p-1.5 rounded-xl transition-all duration-300 group-hover:scale-105"
                   style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))', border: '1px solid rgba(99,102,241,0.3)' }}>
                   <motion.div
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
-                    transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                    animate={isSyncing ? {} : { scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
+                    transition={isSyncing 
+                      ? {} 
+                      : { repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
                   >
-                    <Clapperboard className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                    {isSyncing ? (
+                      <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 animate-spin drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                    ) : (
+                      <Clapperboard className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                    )}
                   </motion.div>
+                  
+                  {/* Status dot overlay */}
+                  {!isSyncing && (
+                    <span 
+                      className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0b1120] z-20 transition-colors duration-300
+                        ${!isOnline ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : 
+                          pendingCount > 0 ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 
+                          'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} 
+                    />
+                  )}
                   {/* Glow */}
                   <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"
                     style={{ background: 'rgba(99,102,241,0.4)' }} />
@@ -612,11 +621,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             {/* ── Header Actions ── */}
             {isDashboard ? (
               <>
-                {/* ── Sync Status Badge ── */}
-                <SyncStatusBadge />
 
-                {/* ── Divider ── */}
-                <div className="hidden sm:block w-px h-4 bg-white/10 flex-none" />
 
                 {/* ── Search ── */}
                 <div className={`relative ml-auto flex-1 min-w-[120px] max-w-[170px] transition-all duration-300 sm:max-w-[280px] ${searchFocused ? 'max-w-[230px] sm:max-w-[340px]' : ''}`}>

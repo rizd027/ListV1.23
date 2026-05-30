@@ -9,7 +9,8 @@ import { FilmModal } from '@/components/ui/FilmModal';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { useFilters } from '@/context/FilterContext';
 import { useToast } from '@/context/ToastContext';
-import { pushOfflineAction, syncOfflineData, getOfflineQueue } from '@/lib/sync';
+import { pushOfflineAction, getOfflineQueue } from '@/lib/sync';
+import { useSyncEngine } from '@/context/SyncContext';
 
 // Interface Film is imported from @/lib/api
 
@@ -20,11 +21,12 @@ export default function DashboardPage() {
   const [filteredData, setFilteredData] = useState<Film[]>([]);
   const { showToast } = useToast();
 
+  const { isOnline, triggerSync } = useSyncEngine();
+
   // Filters dan Data dari context
   const {
     search, typeFilter, sortBy, statusFilter, setStatusFilter, viewMode, addModalOpen, setAddModalOpen,
-    films, setFilms, loadingFilms, setLoadingFilms, dataFetched, setDataFetched,
-    isOnline, isSyncing, setIsSyncing
+    films, setFilms, loadingFilms, setLoadingFilms, dataFetched, setDataFetched
   } = useFilters();
 
   // Optimasi Performa Mobile: Pagination Sederhana (Virtualisasi Manual)
@@ -61,7 +63,6 @@ export default function DashboardPage() {
     }
 
     if (!isSilent) setLoadingFilms(true);
-    else showToast('Mulai menyinkronkan data...', 'info');
 
     const user = localStorage.getItem('film_username');
     const pass = localStorage.getItem('film_password');
@@ -70,45 +71,23 @@ export default function DashboardPage() {
         const result = await fetchFilmData(user, pass);
         setFilms(result);
         setDataFetched(true);
-        if (isSilent) showToast('Data disinkronisasi', 'success');
       } catch (err) {
         console.error(err);
-        showToast('Gagal sinkron data', 'error');
+        if (!isSilent) showToast('Gagal memuat data', 'error');
       }
     }
     setLoadingFilms(false);
-  }, [showToast, setFilms, setDataFetched, setLoadingFilms]);
+  }, [setFilms, setDataFetched, setLoadingFilms, isOnline, showToast]);
 
   useEffect(() => {
     if (!dataFetched) {
       loadData();
     }
 
-    // Auto Sync ketika onlie
-    if (isOnline && dataFetched && !isSyncing) {
-      const queue = getOfflineQueue();
-      if (queue.length > 0) {
-        setIsSyncing(true);
-        const user = localStorage.getItem('film_username')!;
-        const pass = localStorage.getItem('film_password')!;
-        syncOfflineData(user, pass)
-          .then(success => {
-            if (success) {
-               showToast('Data offline berhasil tersinkronisasi!', 'success');
-               loadData(true);
-            } else {
-               showToast('Gagal menyinkronkan sebagian data', 'warning');
-            }
-          })
-          .catch(() => {})
-          .finally(() => setIsSyncing(false));
-      }
-    }
-
     // Tutup hint setelah 6 detik
     const timer = setTimeout(() => setShowHint(false), 6000);
     return () => clearTimeout(timer);
-  }, [dataFetched, loadData, isOnline, isSyncing, setIsSyncing, showToast]);
+  }, [dataFetched, loadData]);
 
   useEffect(() => {
     // Apply filters and sorting
@@ -138,33 +117,30 @@ export default function DashboardPage() {
     if (!itemToDelete) return;
     const { rowIndex, id } = itemToDelete;
 
-    const user = localStorage.getItem('film_username')!;
-    const pass = localStorage.getItem('film_password')!;
+    // Optimistic UI Update menggunakan functional updater agar instan
+    setFilms((prevFilms: Film[]) => prevFilms.filter(f => f.id !== id));
 
-    // Optimistic UI Update
-    const prevData = [...films];
-    setFilms(films.filter(f => f.id !== id));
+    // Tambahkan aksi hapus ke antrean offline/sinkronisasi
+    pushOfflineAction({
+       type: 'delete',
+       rowIndex,
+       tempId: id
+    });
 
+    showToast('Film berhasil dihapus', 'success');
+    setItemToDelete(null);
+    setIsAlertOpen(false); // Tutup modal konfirmasi langsung
+
+    // Jalankan sinkronisasi latar belakang jika online
     if (isOnline) {
-      try {
-        await deleteFilmData(rowIndex, user, pass);
-        showToast('Film berhasil dihapus', 'success');
-        loadData(true);
-      } catch {
-        showToast('Gagal menghapus film', 'error');
-        setFilms(prevData);
-      } finally {
-        setItemToDelete(null);
-      }
-    } else {
-      // OFFLINE MODE
-      pushOfflineAction({
-         type: 'delete',
-         rowIndex,
-         tempId: id
+      triggerSync(false).then(success => {
+        if (success) {
+          loadData(true); // silent refresh setelah sync sukses
+        } else {
+          // Jika sync gagal, kita biarkan di antrean, UI tetap ter-update
+          console.warn('[Sync] Gagal menghapus dari server, akan dicoba lagi nanti.');
+        }
       });
-      showToast('Film dihapus secara lokal', 'success');
-      setItemToDelete(null);
     }
   };
 
@@ -391,20 +367,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Syncing Banner */}
-      {isSyncing && (
-        <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-[20px] p-4 flex items-center justify-between gap-3 shadow-lg shadow-indigo-500/5">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400">
-              <RefreshCw className="w-5 h-5 animate-spin" />
-            </div>
-            <div>
-              <p className="text-[13px] md:text-sm font-bold text-indigo-400 leading-tight">Menyinkronkan Data...</p>
-              <p className="text-[10px] md:text-[11px] text-indigo-400/80 mt-0.5">Menerapkan perubahan offline Anda ke server.</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Stats overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">

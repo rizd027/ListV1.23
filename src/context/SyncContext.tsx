@@ -12,7 +12,7 @@ interface SyncState {
 }
 
 interface SyncContextValue extends SyncState {
-  triggerSync: () => Promise<void>;
+  triggerSync: (showSyncToast?: boolean) => Promise<boolean>;
 }
 
 const SyncContext = createContext<SyncContextValue | null>(null);
@@ -41,20 +41,20 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Main sync function
-  const triggerSync = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    if (syncLockRef.current) return; // Already syncing
-    if (!navigator.onLine) return; // Offline, skip
+  const triggerSync = useCallback(async (showSyncToast = true): Promise<boolean> => {
+    if (typeof window === 'undefined') return false;
+    if (syncLockRef.current) return false; // Already syncing
+    if (!navigator.onLine) return false; // Offline, skip
 
     const queue = getOfflineQueue();
     if (queue.length === 0) {
       refreshPendingCount();
-      return;
+      return true;
     }
 
     const user = localStorage.getItem('film_username');
     const pass = localStorage.getItem('film_password');
-    if (!user || !pass) return;
+    if (!user || !pass) return false;
 
     syncLockRef.current = true;
     setIsSyncing(true);
@@ -68,16 +68,19 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         setLastSyncAt(new Date());
         refreshPendingCount();
         const syncedCount = queue.length;
-        if (syncedCount > 0) {
+        if (syncedCount > 0 && showSyncToast) {
           showToast(`✅ ${syncedCount} perubahan berhasil disinkronkan!`, 'success');
         }
+        return true;
       } else {
         showToast('⚠️ Sebagian data gagal sync, mencoba lagi nanti...', 'error');
         refreshPendingCount();
+        return false;
       }
     } catch (err) {
       console.error('[SyncEngine] Unexpected error:', err);
       showToast('❌ Sync gagal, periksa koneksi Anda.', 'error');
+      return false;
     } finally {
       syncLockRef.current = false;
       setIsSyncing(false);
