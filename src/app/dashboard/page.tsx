@@ -184,7 +184,7 @@ export default function DashboardPage() {
 
               <div className="flex justify-between items-center mb-3 md:mb-5 relative z-10">
                 <span className="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-wider">ID</span>
-                <span className="text-[11px] md:text-[12px] font-black text-white">#{index + 1}</span>
+                <span className="text-[11px] md:text-[12px] font-black text-white">#{film.id}</span>
               </div>
 
               <div className="mb-3 md:mb-4 relative z-10">
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                 key={film.id}
                 className={`border-b border-white/[0.02] last:border-0 hover:bg-white/[0.02] transition-colors ${index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.01]'}`}
               >
-                <td className="px-3 py-3 pl-4 text-[12px] font-bold text-gray-600">#{index + 1}</td>
+                <td className="px-3 py-3 pl-4 text-[12px] font-bold text-gray-600">#{film.id}</td>
                 <td className="px-3 py-3">
                   <span className="text-[13px] font-bold text-white line-clamp-1">{film.title}</span>
                 </td>

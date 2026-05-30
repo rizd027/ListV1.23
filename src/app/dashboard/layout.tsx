@@ -736,12 +736,12 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
       </motion.header>
 
-      <main className={`flex-1 w-full relative z-10 ${pathname === '/dashboard/profile' ? 'overflow-hidden p-0' : 'max-w-[1550px] mx-auto px-2 md:px-6 py-3 md:py-6 pb-24 md:pb-6'}`}>
+      <main className={`flex-1 w-full relative z-10 ${pathname === '/dashboard/profile' ? 'overflow-hidden p-0 pb-24 md:pb-0' : 'max-w-[1550px] mx-auto px-2 md:px-6 py-3 md:py-6 pb-24 md:pb-6'}`}>
         {children}
       </main>
 
       {/* ── Mobile Bottom Bar ── */}
-      {isDashboard && (
+      {(isDashboard || pathname === '/dashboard/profile' || pathname === '/dashboard/stream') && (
         <MobileBottomBar
           username={username}
           avatar={avatar}
