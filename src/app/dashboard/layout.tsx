@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { FilterProvider, useFilters } from '@/context/FilterContext';
 import { useSyncEngine } from '@/context/SyncContext';
+import { useBackInterceptor } from '@/hooks/useBackInterceptor';
 
 /* ── Filter Dropdown ─────────────────────────────────────── */
 function FilterDropdown() {
@@ -218,6 +219,8 @@ function MobileBottomBar({
   const { viewMode, setViewMode, typeFilter, setTypeFilter, sortBy, setSortBy, statusFilter, setStatusFilter, setAddModalOpen } = useFilters();
   const [profileOpen, setProfileOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  useBackInterceptor(profileOpen, () => setProfileOpen(false), 'profileOpen');
+  useBackInterceptor(filterOpen, () => setFilterOpen(false), 'filterOpen');
   // Optimistic UI state for instant button feedback (INP fix)
   const [localViewMode, setLocalViewMode] = useState(viewMode);
   const profileRef = useRef<HTMLDivElement>(null);

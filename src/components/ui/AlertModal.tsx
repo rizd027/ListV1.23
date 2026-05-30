@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, X } from 'lucide-react';
+import { useBackInterceptor } from '@/hooks/useBackInterceptor';
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const AlertModal = ({
   isOpen, title, message, onConfirm, onCancel,
   confirmText = 'Hapus', cancelText = 'Batal', type = 'danger'
 }: AlertModalProps) => {
+  useBackInterceptor(isOpen, onCancel, 'alertModal');
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
 

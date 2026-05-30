@@ -6,6 +6,7 @@ import { useFilters } from '@/context/FilterContext';
 import { pushOfflineAction } from '@/lib/sync';
 import { useSyncEngine } from '@/context/SyncContext';
 import { useToast } from '@/context/ToastContext';
+import { useBackInterceptor } from '@/hooks/useBackInterceptor';
 
 /* ── Custom Select (CSS-only, no motion) ── */
 interface CustomSelectProps {
@@ -236,6 +237,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
   const { films, setFilms } = useFilters();
   const { isOnline, triggerSync } = useSyncEngine();
   const { showToast } = useToast();
+  useBackInterceptor(isOpen, onClose, 'filmModal');
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState<Partial<Film>>({
