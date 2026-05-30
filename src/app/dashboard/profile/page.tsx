@@ -311,7 +311,7 @@ export default function ProfilePage() {
                 value={oldPassword}
                 placeholder="••••••••"
                 onChange={e => setOldPassword(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-xl h-11 md:h-9 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/15"
+                className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-lg h-11 md:h-9 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/15"
               />
             </div>
 
@@ -323,7 +323,7 @@ export default function ProfilePage() {
                 value={newPassword}
                 placeholder="••••••••"
                 onChange={e => setNewPassword(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-xl h-11 md:h-9 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/15"
+                className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-lg h-11 md:h-9 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/15"
               />
             </div>
 
@@ -332,7 +332,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={saving || (!newUsername && !newPassword && !oldPassword && !avatar.startsWith('data:') && newBio === bio)}
-                className="w-full h-11 md:h-9 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold text-sm md:text-[12px] tracking-wide transition-all duration-200 shadow-lg shadow-indigo-900/30"
+                className="w-full h-11 md:h-9 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold text-sm md:text-[12px] tracking-wide transition-all duration-200 shadow-lg shadow-indigo-900/30"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 md:w-3.5 md:h-3.5 animate-spin" />

@@ -13,6 +13,7 @@ const MotionImage = motion(Image);
 
 export default function LoginPage() {
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,9 +34,15 @@ export default function LoginPage() {
     const user = localStorage.getItem('film_username');
     const pass = localStorage.getItem('film_password');
     if (user && pass) {
-      router.push('/dashboard');
+      router.replace('/dashboard');
+    } else {
+      setCheckingAuth(false);
     }
   }, [router]);
+
+  if (checkingAuth) {
+    return <div className="min-h-screen w-full bg-[#0B1120]" />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,17 +196,17 @@ export default function LoginPage() {
           </motion.div>
 
           {/* Auth Tabs */}
-          <div className="flex p-1 bg-white/5 border border-white/5 rounded-xl">
+          <div className="flex p-1 bg-white/5 border border-white/5 rounded-lg">
             <button
               onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }}
-              className={`flex-1 flex items-center justify-center py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${isLogin ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25' : 'text-gray-400 hover:text-white'
+              className={`flex-1 flex items-center justify-center py-2 text-sm font-semibold rounded-md transition-all duration-300 ${isLogin ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25' : 'text-gray-400 hover:text-white'
                 }`}
             >
               Masuk
             </button>
             <button
               onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }}
-              className={`flex-1 flex items-center justify-center py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${!isLogin ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25' : 'text-gray-400 hover:text-white'
+              className={`flex-1 flex items-center justify-center py-2 text-sm font-semibold rounded-md transition-all duration-300 ${!isLogin ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25' : 'text-gray-400 hover:text-white'
                 }`}
             >
               Daftar
@@ -214,7 +221,7 @@ export default function LoginPage() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-2.5 rounded-lg text-xs font-medium"
+                  className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-2.5 rounded-md text-xs font-medium"
                 >
                   {error}
                 </motion.div>
@@ -224,7 +231,7 @@ export default function LoginPage() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-2.5 rounded-lg text-xs font-medium"
+                  className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-2.5 rounded-md text-xs font-medium"
                 >
                   {success}
                 </motion.div>
@@ -241,7 +248,7 @@ export default function LoginPage() {
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase() }))}
-                  className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                   placeholder="Masukkan username"
                 />
               </div>
@@ -257,7 +264,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                   placeholder="Masukkan password"
                 />
                 <button
@@ -285,7 +292,7 @@ export default function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="w-full bg-slate-900/50 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium"
+                      className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium"
                       placeholder="Ulangi password"
                     />
                   </div>
@@ -296,7 +303,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 mt-2 rounded-xl text-sm font-bold text-white shadow-lg flex items-center justify-center transition-all ${loading ? 'bg-indigo-500/70 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 hover:-translate-y-0.5 shadow-indigo-500/25'
+              className={`w-full py-3 mt-2 rounded-lg text-sm font-bold text-white shadow-lg flex items-center justify-center transition-all ${loading ? 'bg-indigo-500/70 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 hover:-translate-y-0.5 shadow-indigo-500/25'
                 }`}
             >
               {loading ? (

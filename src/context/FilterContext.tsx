@@ -58,6 +58,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.length > 0) {
             setFilms(parsed);
+            setLoadingFilms(false);
           }
         } catch (e) {}
       }

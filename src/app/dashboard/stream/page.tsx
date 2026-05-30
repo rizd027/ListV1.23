@@ -181,7 +181,7 @@ export default function StreamPage() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 md:mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.2)] border border-indigo-500/30"
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.2)] border border-indigo-500/30"
               style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))' }}>
               <MonitorPlay className="w-5 h-5 md:w-6 md:h-6 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
             </div>
@@ -196,7 +196,7 @@ export default function StreamPage() {
           
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center justify-center self-start sm:self-auto gap-1.5 h-8 md:h-10 px-3 md:px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs md:text-sm tracking-wide transition-all duration-200 shadow-lg shadow-indigo-900/40 active:scale-95 shrink-0"
+            className="flex items-center justify-center self-start sm:self-auto gap-1.5 h-8 md:h-10 px-3 md:px-4 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs md:text-sm tracking-wide transition-all duration-200 shadow-lg shadow-indigo-900/40 active:scale-95 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             Tambah Link
@@ -211,7 +211,7 @@ export default function StreamPage() {
             placeholder="Cari platform stream..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 md:h-11 pl-10 pr-4 rounded-[14px] bg-white/[0.03] border border-white/5 hover:border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 outline-none text-[11px] md:text-xs text-white placeholder:text-gray-500 transition-all shadow-sm"
+            className="w-full h-10 md:h-11 pl-10 pr-4 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 outline-none text-[11px] md:text-xs text-white placeholder:text-gray-500 transition-all shadow-sm"
           />
         </div>
 
@@ -219,7 +219,7 @@ export default function StreamPage() {
         <div className="flex flex-col gap-2 md:gap-3">
           <AnimatePresence>
             {filteredLinks.length === 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-gray-500 text-sm font-medium border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-gray-500 text-sm font-medium border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
                 {searchQuery ? 'Tidak ada platform yang cocok.' : 'Belum ada data link stream.\nSilakan tekan "Tambah Link" untuk membuat.'}
               </motion.div>
             )}
@@ -235,13 +235,13 @@ export default function StreamPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 transition={{ duration: 0.3, ease: "easeOut", delay: index * 0.04 }}
-                className="group relative flex flex-row items-center gap-2 sm:gap-3 p-2 md:p-3 pr-3 md:pr-4 rounded-[16px] md:rounded-2xl transition-all duration-300 hover:scale-[1.01] overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] shadow-md hover:shadow-xl hover:shadow-black/40"
+                className="group relative flex flex-row items-center gap-2 sm:gap-3 p-2 md:p-3 pr-3 md:pr-4 rounded-xl transition-all duration-300 hover:scale-[1.01] overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] shadow-md hover:shadow-xl hover:shadow-black/40"
               >
                 {/* Glow Background on hover */}
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500 bg-gradient-to-r ${link.color}`} />
                 
                 {/* Icon Box */}
-                <div className="w-9 h-9 md:w-12 md:h-12 shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105"
+                <div className="w-9 h-9 md:w-12 md:h-12 shrink-0 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105"
                      style={{ background: link.bg, border: `1px solid ${link.border}` }}>
                   <PlayCircle className="w-4 h-4 md:w-6 md:h-6 text-white/90 group-hover:text-white transition-colors drop-shadow-sm" strokeWidth={1.5} />
                 </div>
@@ -259,13 +259,13 @@ export default function StreamPage() {
                 <div className="flex items-center gap-1 md:gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 translate-x-0 sm:translate-x-4 sm:group-hover:translate-x-0">
                   <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenModal(link); }}
-                    className="p-1.5 md:p-2 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors"
+                    className="p-1.5 md:p-2 rounded-md bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors"
                   >
                     <Edit2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
                   </button>
                   <button
                     onClick={(e) => handleDelete(e, link.id)}
-                    className="p-1.5 md:p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
+                    className="p-1.5 md:p-2 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
                   >
                     <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
                   </button>
@@ -294,21 +294,21 @@ export default function StreamPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
-              className="relative w-full max-w-sm rounded-[24px] border border-white/[0.08] p-6 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-sm rounded-xl border border-white/[0.08] p-6 shadow-2xl overflow-hidden"
               style={{ background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(30px)' }}
             >
-               <div className="absolute inset-0 border-[2px] border-indigo-500/20 rounded-[24px] pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, black, transparent)' }} />
+               <div className="absolute inset-0 border-[2px] border-indigo-500/20 rounded-xl pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, black, transparent)' }} />
               
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-md bg-indigo-500/20 flex items-center justify-center">
                     <Link2 className="w-4 h-4 text-indigo-400" />
                   </div>
                   {editingId ? 'Edit Link' : 'Tambah Link'}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -323,7 +323,7 @@ export default function StreamPage() {
                     placeholder="Contoh: Netflix"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full h-11 rounded-xl bg-white/[0.03] border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 px-4 text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
+                    className="w-full h-11 rounded-lg bg-white/[0.03] border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 px-4 text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
                   />
                 </div>
                 <div>
@@ -334,13 +334,13 @@ export default function StreamPage() {
                     placeholder="https://..."
                     value={formData.url}
                     onChange={e => setFormData({ ...formData, url: e.target.value })}
-                    className="w-full h-11 rounded-xl bg-white/[0.03] border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 px-4 text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
+                    className="w-full h-11 rounded-lg bg-white/[0.03] border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 px-4 text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
                   />
                 </div>
                 
                 <button
                   type="submit"
-                  className="w-full h-11 mt-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-900/30 active:scale-[0.98]"
+                  className="w-full h-11 mt-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-900/30 active:scale-[0.98]"
                 >
                   {editingId ? 'Simpan Perubahan' : 'Tambahkan'}
                 </button>

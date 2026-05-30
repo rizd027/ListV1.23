@@ -70,7 +70,7 @@ const Toast = ({ message, type, onClose }: ToastProps) => {
       initial={{ opacity: 0, y: -15, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.15 } }}
-      className={`fixed top-[68px] right-4 sm:top-[76px] sm:right-6 z-[9999] flex items-start gap-2 p-2.5 rounded-xl border border-white/[0.08] bg-[#0b0e17]/95 backdrop-blur-xl shadow-[0_12px_30px_rgba(0,0,0,0.5)] border-l-4 ${borderLeft} w-[240px] overflow-hidden`}
+      className={`fixed top-[68px] right-4 sm:top-[76px] sm:right-6 z-[9999] flex items-start gap-2 p-2.5 rounded-lg border border-white/[0.08] bg-[#0b0e17]/95 backdrop-blur-xl shadow-[0_12px_30px_rgba(0,0,0,0.5)] border-l-4 ${borderLeft} w-[240px] overflow-hidden`}
     >
       <div className="flex-shrink-0 mt-0.5">
         {icon}

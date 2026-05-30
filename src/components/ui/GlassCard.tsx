@@ -25,7 +25,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
         <div
           ref={ref as any}
           className={cn(
-            "glass-card rounded-2xl p-6 overflow-hidden md:p-8 w-full",
+            "glass-card rounded-xl p-6 overflow-hidden md:p-8 w-full",
             className
           )}
           {...(props as any)}
@@ -39,7 +39,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
       <motion.div
         ref={ref}
         className={cn(
-          "glass-card rounded-2xl p-6 overflow-hidden md:p-8 w-full",
+          "glass-card rounded-xl p-6 overflow-hidden md:p-8 w-full",
           className
         )}
         initial={undefined}

@@ -56,13 +56,17 @@ export default function DashboardPage() {
   const [itemToDelete, setItemToDelete] = useState<{ rowIndex: number, id: number } | null>(null);
 
   const loadData = useCallback(async (isSilent = false) => {
+    // SWR Pattern: If we already have films loaded, load silently in the background
+    const hasCachedData = films.length > 0;
+    const silent = isSilent || hasCachedData;
+
     if (!isOnline) {
-      if (!isSilent) setLoadingFilms(false);
+      if (!silent) setLoadingFilms(false);
       setDataFetched(true);
       return;
     }
 
-    if (!isSilent) setLoadingFilms(true);
+    if (!silent) setLoadingFilms(true);
 
     const user = localStorage.getItem('film_username');
     const pass = localStorage.getItem('film_password');
@@ -73,11 +77,11 @@ export default function DashboardPage() {
         setDataFetched(true);
       } catch (err) {
         console.error(err);
-        if (!isSilent) showToast('Gagal memuat data', 'error');
+        if (!silent) showToast('Gagal memuat data', 'error');
       }
     }
     setLoadingFilms(false);
-  }, [setFilms, setDataFetched, setLoadingFilms, isOnline, showToast]);
+  }, [films.length, setFilms, setDataFetched, setLoadingFilms, isOnline, showToast]);
 
   useEffect(() => {
     if (!dataFetched) {
@@ -173,7 +177,7 @@ export default function DashboardPage() {
           return (
             <div
               key={film.id}
-              className="relative group flex flex-col bg-[#0f141f] hover:bg-[#131926] border border-white/[0.03] hover:border-indigo-500/20 rounded-[16px] md:rounded-[20px] p-3 md:p-5 transition-all duration-300 shadow-xl shadow-black/20 overflow-hidden"
+              className="relative group flex flex-col bg-[#0f141f] hover:bg-[#131926] border border-white/[0.03] hover:border-indigo-500/20 rounded-xl p-3 md:p-5 transition-all duration-300 shadow-xl shadow-black/20 overflow-hidden"
             >
               {/* Subtle accent for hover depth */}
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -196,7 +200,7 @@ export default function DashboardPage() {
               <div className="flex gap-2 md:gap-4 mb-4 md:mb-5 relative z-10">
                 <div className="flex-1">
                   <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Tipe</span>
-                  <span className="inline-block px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-white/[0.03] border border-white/5 text-[10px] md:text-[11px] font-medium text-gray-300">
+                  <span className="inline-block px-2 md:px-3 py-1 md:py-1.5 rounded-md bg-white/[0.03] border border-white/5 text-[10px] md:text-[11px] font-medium text-gray-300">
                     {film.type}
                   </span>
                 </div>
@@ -209,7 +213,7 @@ export default function DashboardPage() {
               <div className="flex gap-2 md:gap-4 mb-4 md:mb-5 relative z-10">
                 <div className="flex-1">
                   <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Status</span>
-                  <span className={`inline-block px-2 py-1 md:px-2.5 md:py-1.5 rounded-lg text-[9px] md:text-[10px] font-black tracking-wider uppercase
+                  <span className={`inline-block px-2 py-1 md:px-2.5 md:py-1.5 rounded-md text-[9px] md:text-[10px] font-black tracking-wider uppercase
                     ${film.status === 'Selesai' ? 'bg-emerald-500/10 text-emerald-500' :
                       film.status === 'Watching' ? 'bg-amber-500/10 text-amber-500' :
                         film.status === 'Rencana' ? 'bg-blue-500/10 text-blue-500' :
@@ -245,10 +249,10 @@ export default function DashboardPage() {
               <div className="mt-auto flex items-end justify-between relative z-10">
                 <span className="text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 md:mb-3">Aksi</span>
                 <div className="flex gap-1.5 md:gap-2">
-                  <button onClick={() => handleEditClick(film)} className="p-2 md:p-3 rounded-lg md:rounded-xl bg-white/[0.04] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-indigo-500/30 transition-all active:scale-95" title="Edit">
+                  <button onClick={() => handleEditClick(film)} className="p-2 md:p-3 rounded-md md:rounded-lg bg-white/[0.04] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-indigo-500/30 transition-all active:scale-95" title="Edit">
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDeleteClick(film.rowIndex, film.id)} className="p-2 md:p-3 rounded-lg md:rounded-xl bg-white/[0.04] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-red-500/30 transition-all active:scale-95" title="Hapus">
+                  <button onClick={() => handleDeleteClick(film.rowIndex, film.id)} className="p-2 md:p-3 rounded-md md:rounded-lg bg-white/[0.04] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-red-500/30 transition-all active:scale-95" title="Hapus">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -293,7 +297,7 @@ export default function DashboardPage() {
                 </td>
                 <td className="px-3 py-3 text-center text-[13px] font-black text-indigo-400">{film.episodes || '0'}</td>
                 <td className="px-3 py-3">
-                  <span className={`px-2 py-0.5 rounded-md text-[9px] font-black tracking-widest uppercase border
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase border
                     ${film.status === 'Selesai' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                       film.status === 'Watching' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                         film.status === 'Rencana' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
@@ -312,7 +316,7 @@ export default function DashboardPage() {
                 </td>
                 <td className="px-3 py-3 text-center">
                   {film.link ? (
-                    <a href={film.link} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/25 transition-all inline-block">
+                    <a href={film.link} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/25 transition-all inline-block">
                       <LinkIcon className="w-3 h-3" />
                     </a>
                   ) : (
@@ -323,14 +327,14 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-end gap-1">
                     <button
                       onClick={() => handleEditClick(film)}
-                      className="p-2 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all active:scale-95"
+                      className="p-2 rounded-md text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all active:scale-95"
                       title="Edit"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDeleteClick(film.rowIndex, film.id)}
-                      className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95"
+                      className="p-2 rounded-md text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95"
                       title="Hapus"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -354,9 +358,9 @@ export default function DashboardPage() {
     <div className="space-y-4">
       {/* Offline Banner */}
       {!isOnline && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-[20px] p-4 flex items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-500">
+            <div className="p-2.5 rounded-lg bg-amber-500/20 text-amber-500">
               <WifiOff className="w-5 h-5" />
             </div>
             <div>
@@ -384,7 +388,7 @@ export default function DashboardPage() {
               className={`p-3 md:p-3.5 border cursor-pointer transition-all duration-300 relative group overflow-hidden ${isActive ? stat.activeBorder : `${stat.border} ${stat.bg}`} hover:border-white/20`}
             >
               <div className="flex items-center gap-3.5 relative z-10">
-                <div className={`flex-none p-2 rounded-xl ${stat.bg} ${stat.border} border group-hover:scale-110 transition-transform duration-500 ${isActive ? 'bg-white/10' : ''}`}>
+                <div className={`flex-none p-2 rounded-lg ${stat.bg} ${stat.border} border group-hover:scale-110 transition-transform duration-500 ${isActive ? 'bg-white/10' : ''}`}>
                   <stat.Icon className={`w-4 h-4 ${stat.color}`} />
                 </div>
                 <div className="min-w-0">
@@ -508,7 +512,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 10, scale: 0.5 }}
               animate={{ opacity: 1, y: -45, scale: 1 }}
               exit={{ opacity: 0, y: 0, scale: 0.5 }}
-              className="absolute right-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-[11px] font-bold text-white shadow-2xl pointer-events-none z-[60]"
+              className="absolute right-0 whitespace-nowrap px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 text-[11px] font-bold text-white shadow-2xl pointer-events-none z-[60]"
               style={{ top: 0 }}
             >
               Coba gerakkan saya 👋

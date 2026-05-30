@@ -34,7 +34,7 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between bg-slate-900/40 border border-white/8 rounded-xl pl-9 pr-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-indigo-500/40 transition-colors font-medium"
+        className="w-full flex items-center justify-between bg-slate-900/40 border border-white/8 rounded-lg pl-9 pr-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-indigo-500/40 transition-colors font-medium"
       >
         <span className="absolute left-3 top-1/2 -translate-y-1/2">
           <Icon className="w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
@@ -45,7 +45,7 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
 
       {/* Dropdown — CSS visibility, no motion */}
       <div
-        className="absolute z-[80] w-full mt-1 p-1 flex flex-col gap-0.5 rounded-xl border border-white/8 shadow-xl overflow-hidden transition-all duration-150"
+        className="absolute z-[80] w-full mt-1 p-1 flex flex-col gap-0.5 rounded-lg border border-white/8 shadow-xl overflow-hidden transition-all duration-150"
         style={{
           background: '#0c0f1d',
           opacity: open ? 1 : 0,
@@ -59,7 +59,7 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
             key={option.value}
             type="button"
             onClick={() => { onChange(option.value); setOpen(false); }}
-            className={`w-full text-left px-3 py-2 rounded-lg text-[12px] font-medium transition-colors ${value === option.value
+            className={`w-full text-left px-3 py-2 rounded-md text-[12px] font-medium transition-colors ${value === option.value
               ? 'bg-indigo-500/20 text-indigo-300'
               : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
               }`}
@@ -511,9 +511,9 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
     }
   };
 
-  const inputCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-xl pl-9 pr-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium";
-  const inputNoIconCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-xl px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium text-center";
-  const textareaCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-xl px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium resize-none";
+  const inputCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg pl-9 pr-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium";
+  const inputNoIconCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium text-center";
+  const textareaCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium resize-none";
   const labelCls = "text-[9px] font-bold text-gray-500 uppercase tracking-widest ml-0.5 block mb-1";
 
   if (!mounted || !isOpen) return null;
@@ -530,7 +530,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
       <div className="relative w-full h-full sm:h-auto sm:max-w-[560px] z-10">
         <form
           onSubmit={handleSubmit}
-          className="w-full h-full sm:h-auto sm:rounded-2xl overflow-hidden rounded-none flex flex-col"
+          className="w-full h-full sm:h-auto sm:rounded-xl overflow-hidden rounded-none flex flex-col"
           style={{
             background: '#0e1120',
             border: '1px solid rgba(255,255,255,0.07)',
@@ -540,7 +540,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
           {/* Header */}
           <div className="flex-none flex items-center justify-between px-4 py-3.5 border-b border-white/[0.05]">
             <div className="flex items-center gap-2">
-              <div className="p-1 bg-indigo-500/10 border border-indigo-500/20 rounded-md">
+              <div className="p-1 bg-indigo-500/10 border border-indigo-500/20 rounded-sm">
                 {filmToEdit
                   ? <Edit2 className="w-3.5 h-3.5 text-indigo-400" />
                   : <PlusCircle className="w-3.5 h-3.5 text-indigo-400" />}
@@ -552,7 +552,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -698,7 +698,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
 
             {recording ? (
               /* Recording Mode takes the full row */
-              <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-between gap-3 shadow-lg shadow-rose-500/5 animate-pulse w-full">
+              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-center justify-between gap-3 shadow-lg shadow-rose-500/5 animate-pulse w-full">
                 <div className="flex items-center gap-2">
                   <Radio className="w-4 h-4 text-rose-500 animate-ping" />
                   <span className="text-[10px] font-bold text-rose-300 uppercase tracking-widest">
@@ -709,7 +709,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                   <button
                     type="button"
                     onClick={stopRecording}
-                    className="p-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 active:scale-90 transition-all"
+                    className="p-1.5 rounded-md bg-emerald-500 text-white hover:bg-emerald-600 active:scale-90 transition-all"
                     title="Selesai dan Transkripsi"
                   >
                     <Square className="w-3.5 h-3.5 fill-white" />
@@ -717,7 +717,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                   <button
                     type="button"
                     onClick={cancelRecording}
-                    className="p-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 active:scale-90 transition-all"
+                    className="p-1.5 rounded-md bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 active:scale-90 transition-all"
                     title="Batal"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -726,7 +726,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
               </div>
             ) : aiLoading ? (
               /* AI Loading Mode takes the full row */
-              <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center gap-2.5 shadow-lg shadow-indigo-500/5 w-full">
+              <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/25 flex items-center gap-2.5 shadow-lg shadow-indigo-500/5 w-full">
                 <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
                 <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest leading-none">
                   {aiStatusText || 'AI sedang bekerja...'}
@@ -740,7 +740,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                   <button
                     type="button"
                     onClick={startRecording}
-                    className="flex items-center justify-center gap-1.5 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all text-xs font-bold min-w-[44px] min-h-[44px]"
+                    className="flex items-center justify-center gap-1.5 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all text-xs font-bold min-w-[44px] min-h-[44px]"
                   >
                     <Mic className="w-[18px] h-[18px]" />
                     <span className="hidden sm:inline">Input Suara</span>
@@ -748,7 +748,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                   <button
                     type="button"
                     onClick={handleImageScanClick}
-                    className="flex items-center justify-center gap-1.5 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all text-xs font-bold min-w-[44px] min-h-[44px]"
+                    className="flex items-center justify-center gap-1.5 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all text-xs font-bold min-w-[44px] min-h-[44px]"
                   >
                     <Camera className="w-[18px] h-[18px]" />
                     <span className="hidden sm:inline">Scan Gambar</span>
@@ -758,7 +758,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                 {/* Submit button on the right */}
                 <button
                   type="submit" disabled={loading}
-                  className="flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white min-w-[110px] px-6 py-3 rounded-xl text-[13px] font-bold active:scale-95 transition-all disabled:opacity-50 min-h-[44px]"
+                  className="flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white min-w-[110px] px-6 py-3 rounded-lg text-[13px] font-bold active:scale-95 transition-all disabled:opacity-50 min-h-[44px]"
                 >
                   {loading ? (
                     <Loader2 className="animate-spin w-4 h-4" />

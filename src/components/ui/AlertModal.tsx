@@ -61,7 +61,7 @@ export const AlertModal = ({
 
       {/* Panel */}
       <div
-        className="relative w-full max-w-[340px] rounded-2xl overflow-hidden transition-all duration-200"
+        className="relative w-full max-w-[340px] rounded-xl overflow-hidden transition-all duration-200"
         style={{
           background: '#0f1220',
           border: '1px solid rgba(255,255,255,0.06)',
@@ -72,13 +72,13 @@ export const AlertModal = ({
       >
         <button
           onClick={onCancel}
-          className="absolute top-3 right-3 p-1.5 rounded-lg text-gray-600 hover:text-white hover:bg-white/[0.06] transition-colors"
+          className="absolute top-3 right-3 p-1.5 rounded-md text-gray-600 hover:text-white hover:bg-white/[0.06] transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex flex-col items-center text-center px-6 pt-8 pb-6">
-          <div className={`p-3.5 rounded-2xl mb-4 ${iconColor}`}>
+          <div className={`p-3.5 rounded-lg mb-4 ${iconColor}`}>
             <AlertCircle className="w-7 h-7" />
           </div>
           <h3 className="text-lg font-black text-white mb-2">{title}</h3>
@@ -87,13 +87,13 @@ export const AlertModal = ({
           <div className="flex w-full gap-2.5">
             <button
               onClick={onCancel}
-              className="flex-1 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+              className="flex-1 h-10 rounded-lg bg-white/[0.04] border border-white/[0.06] text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/[0.08] transition-colors"
             >
               {cancelText}
             </button>
             <button
               onClick={() => { onConfirm(); onCancel(); }}
-              className={`flex-1 h-10 rounded-xl text-sm font-bold text-white transition-colors ${confirmColor}`}
+              className={`flex-1 h-10 rounded-lg text-sm font-bold text-white transition-colors ${confirmColor}`}
             >
               {confirmText}
             </button>

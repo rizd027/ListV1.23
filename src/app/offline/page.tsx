@@ -55,13 +55,13 @@ export default function OfflinePage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="relative"
         >
-          <div className="w-24 h-24 rounded-3xl flex items-center justify-center"
+          <div className="w-24 h-24 rounded-xl flex items-center justify-center"
             style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}
           >
             <WifiOff className="w-12 h-12 text-indigo-400" strokeWidth={1.5} />
           </div>
           {/* Pulse ring */}
-          <div className="absolute inset-0 rounded-3xl animate-ping opacity-20"
+          <div className="absolute inset-0 rounded-xl animate-ping opacity-20"
             style={{ background: 'rgba(99,102,241,0.3)' }} />
         </motion.div>
 
@@ -98,7 +98,7 @@ export default function OfflinePage() {
           transition={{ duration: 0.5, delay: 0.5 }}
           onClick={handleRetry}
           disabled={retrying}
-          className="flex items-center gap-2.5 px-6 py-3 rounded-2xl text-sm font-bold text-white transition-all duration-300 disabled:opacity-60"
+          className="flex items-center gap-2.5 px-6 py-3 rounded-lg text-sm font-bold text-white transition-all duration-300 disabled:opacity-60"
           style={{
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             boxShadow: '0 8px 24px rgba(99,102,241,0.3)',
