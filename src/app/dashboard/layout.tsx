@@ -216,6 +216,7 @@ function MobileBottomBar({
   username: string; avatar?: string | null; bio?: string | null;
   onLogout: () => void; isDashboard: boolean;
 }) {
+  const router = useRouter();
   const { viewMode, setViewMode, typeFilter, setTypeFilter, sortBy, setSortBy, statusFilter, setStatusFilter, setAddModalOpen } = useFilters();
   const [profileOpen, setProfileOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -315,19 +316,37 @@ function MobileBottomBar({
               </div>
             </div>
             <div className="p-1 space-y-0.5">
-              <Link href="/dashboard/profile" onClick={() => setProfileOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]">
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setTimeout(() => router.push('/dashboard/profile'), 120);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]"
+              >
                 <User className="w-4 h-4 text-gray-400" strokeWidth={2} />
                 Edit Profil
-              </Link>
-              <Link href="/dashboard/stream" onClick={() => setProfileOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]">
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setTimeout(() => router.push('/dashboard/stream'), 120);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]"
+              >
                 <Link2 className="w-4 h-4 text-gray-400" strokeWidth={2} />
                 Link Stream
-              </Link>
+              </button>
               <div className="h-px bg-white/[0.05] my-1 mx-2" />
-              <button onClick={() => { setProfileOpen(false); onLogout(); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-semibold text-red-400/90 hover:bg-red-500/10 transition-all active:scale-[0.98]">
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  setTimeout(() => onLogout(), 120);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-semibold text-red-400/90 hover:bg-red-500/10 transition-all active:scale-[0.98]"
+              >
                 <LogOut className="w-4 h-4 text-red-400" strokeWidth={2} />
                 Log Keluar
               </button>
