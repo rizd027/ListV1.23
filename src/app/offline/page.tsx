@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Outfit } from 'next/font/google';
 import { WifiOff, RefreshCw, Clapperboard } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const outfit = Outfit({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] });
 
@@ -44,7 +45,13 @@ export default function OfflinePage() {
           transition={{ duration: 0.6 }}
           className="flex items-center gap-2.5 text-indigo-400"
         >
-          <Clapperboard className="w-8 h-8" />
+          <Image
+            src="/listv-logo.png"
+            alt="ListV Logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-lg object-contain shadow-md shadow-indigo-500/20"
+          />
           <span className="text-3xl font-black tracking-tight text-white">ListV</span>
         </motion.div>
 

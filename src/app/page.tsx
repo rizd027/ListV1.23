@@ -186,8 +186,14 @@ export default function LoginPage() {
             transition={{ duration: 0.6 }}
             className="text-center space-y-1.5"
           >
-            <div className="flex items-center justify-center space-x-2 text-indigo-500 mb-2">
-              <Clapperboard className="w-7 h-7" />
+            <div className="flex items-center justify-center space-x-2.5 mb-2">
+              <Image
+                src="/listv-logo.png"
+                alt="ListV Logo"
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-lg object-contain shadow-md shadow-indigo-500/20"
+              />
               <h1 className="text-3xl font-bold tracking-tight text-white">ListV</h1>
             </div>
             <p className="text-gray-400 text-[13px] leading-snug px-4">

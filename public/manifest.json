@@ -12,9 +12,9 @@
   "categories": ["entertainment", "lifestyle"],
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/listv-logo.png",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
@@ -78,7 +78,7 @@
       "short_name": "Dashboard",
       "description": "Buka koleksi film saya",
       "url": "/dashboard",
-      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+      "icons": [{ "src": "/listv-logo.png", "sizes": "any" }]
     }
   ],
   "screenshots": [],

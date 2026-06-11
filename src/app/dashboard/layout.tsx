@@ -608,7 +608,13 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                     {isSyncing ? (
                       <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 animate-spin drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
                     ) : (
-                      <Clapperboard className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                      <Image
+                        src="/listv-logo.png"
+                        alt="ListV Logo"
+                        width={28}
+                        height={28}
+                        className="w-6 h-6 md:w-7 md:h-7 rounded-md object-contain"
+                      />
                     )}
                   </motion.div>
                   
