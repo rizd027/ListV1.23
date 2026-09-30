@@ -1,47 +1,218 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { fetchFilmData, deleteFilmData, Film } from '@/lib/api';
-import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Sparkles, Film as FilmIcon, Tv, MonitorPlay, Video, Clapperboard, RefreshCw, ChevronDown, WifiOff } from 'lucide-react';
+import { Film } from '@/lib/api';
+import { Loader2, Edit2, Trash2, CheckCircle2, Activity, Eye, Calendar, Link as LinkIcon, FolderPlus, Film as FilmIcon, ChevronDown, WifiOff, Plus } from 'lucide-react';
 import { FilmModal } from '@/components/ui/FilmModal';
 import { AlertModal } from '@/components/ui/AlertModal';
 import { useFilters } from '@/context/FilterContext';
 import { useToast } from '@/context/ToastContext';
-import { pushOfflineAction, getOfflineQueue } from '@/lib/sync';
+import { pushOfflineAction } from '@/lib/sync';
 import { useSyncEngine } from '@/context/SyncContext';
+import { fetchFilmData } from '@/lib/api';
 
-// Interface Film is imported from @/lib/api
+// ── Stat Card (memoized to prevent re-render from parent) ──
+const StatCard = ({
+  label, value, color, Icon, isActive, loading, onClick
+}: {
+  label: string; value: number; color: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  isActive: boolean; loading: boolean;
+  onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={`text-left p-3.5 md:p-4 rounded-lg border transition-colors group
+      ${isActive
+        ? 'bg-white/[0.04] border-white/[0.12]'
+        : 'bg-[#0c1018] border-white/[0.04] hover:border-white/[0.08] hover:bg-[#0f1520]'
+      }`}
+  >
+    <div className="flex items-center justify-between mb-2.5">
+      <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">{label}</span>
+      <Icon className={`w-3.5 h-3.5 ${color} opacity-50`} />
+    </div>
+    <p className={`text-2xl md:text-3xl font-bold ${isActive ? 'text-white' : 'text-gray-200'}`}>
+      {loading ? <Loader2 className="w-5 h-5 animate-spin opacity-30" /> : value}
+    </p>
+  </button>
+);
+
+// ── Film Row (memoized, prevents grid/table row re-render) ──
+const GridCard = React.memo(({ film, onEdit, onDelete }: {
+  film: Film;
+  onEdit: (film: Film) => void;
+  onDelete: (rowIndex: number, id: number) => void;
+}) => (
+  <div
+    onClick={() => onEdit(film)}
+    className="relative group flex flex-col bg-[#0c1018] hover:bg-[#0f1520] border border-white/[0.04] hover:border-indigo-500/30 rounded-lg p-4 md:p-5 transition-all overflow-hidden cursor-pointer"
+  >
+    {/* Top row: ID + Actions */}
+    <div className="flex justify-between items-start mb-4">
+      <span className="text-[10px] font-mono text-gray-600">#{film.id}</span>
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-100" onClick={e => e.stopPropagation()}>
+        <button
+          onClick={(e) => { e.stopPropagation(); onEdit(film); }}
+          className="p-1.5 text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors rounded"
+          title="Edit"
+        >
+          <Edit2 className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }}
+          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors rounded"
+          title="Hapus"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+
+    <h3 className="text-[14px] md:text-[15px] font-semibold text-white group-hover:text-indigo-300 leading-snug line-clamp-2 mb-3 transition-colors">
+      {film.title}
+    </h3>
+
+    <div className="flex items-center gap-2 mb-3 flex-wrap">
+      <span className="inline-block px-2 py-0.5 text-[10px] font-medium text-gray-400 bg-white/[0.04] border border-white/[0.05] rounded">
+        {film.type}
+      </span>
+      <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded border
+        ${film.status === 'Selesai' ? 'text-emerald-400 bg-emerald-500/[0.08] border-emerald-500/20' :
+          film.status === 'Watching' ? 'text-amber-400 bg-amber-500/[0.08] border-amber-500/20' :
+          film.status === 'Rencana' ? 'text-blue-400 bg-blue-500/[0.08] border-blue-500/20' :
+          'text-red-400 bg-red-500/[0.08] border-red-500/20'}`}
+      >
+        {film.status}
+      </span>
+      {film.episodes && (
+        <span className="text-[10px] font-mono text-gray-500">{film.episodes} eps</span>
+      )}
+    </div>
+
+    {film.cast && (
+      <p className="text-[11px] text-gray-500 line-clamp-1 mb-2">{film.cast}</p>
+    )}
+
+    <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/[0.04]">
+      <span className="text-[10px] text-gray-600">{formatDate(film.date)}</span>
+      {film.link && (
+        <a
+          href={film.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors"
+          onClick={e => e.stopPropagation()}
+        >
+          <LinkIcon className="w-3 h-3" />
+          Link
+        </a>
+      )}
+    </div>
+  </div>
+));
+GridCard.displayName = 'GridCard';
+
+const TableRow = React.memo(({ film, index, onEdit, onDelete }: {
+  film: Film; index: number;
+  onEdit: (film: Film) => void;
+  onDelete: (rowIndex: number, id: number) => void;
+}) => (
+  <tr
+    onClick={() => onEdit(film)}
+    className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.03] transition-colors group cursor-pointer"
+  >
+    <td className="px-3 py-3.5 pl-5 text-[11px] font-mono text-gray-600">#{film.id}</td>
+    <td className="px-3 py-3.5">
+      <span className="text-[13px] font-semibold text-white group-hover:text-indigo-300 line-clamp-1 transition-colors">
+        {film.title}
+      </span>
+    </td>
+    <td className="px-3 py-3.5 text-[11px] text-gray-500 max-w-[180px] truncate" title={film.cast}>{film.cast || '—'}</td>
+    <td className="px-3 py-3.5">
+      <span className="px-2 py-0.5 text-[10px] font-medium text-gray-400 bg-white/[0.04] border border-white/[0.05] rounded">
+        {film.type}
+      </span>
+    </td>
+    <td className="px-3 py-3.5 text-center text-[12px] font-mono text-indigo-400">{film.episodes || '—'}</td>
+    <td className="px-3 py-3.5">
+      <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase border rounded
+        ${film.status === 'Selesai' ? 'bg-emerald-500/[0.08] text-emerald-400 border-emerald-500/20' :
+          film.status === 'Watching' ? 'bg-amber-500/[0.08] text-amber-400 border-amber-500/20' :
+          film.status === 'Rencana' ? 'bg-blue-500/[0.08] text-blue-400 border-blue-500/20' :
+          'bg-red-500/[0.08] text-red-400 border-red-500/20'}`}
+      >
+        {film.status}
+      </span>
+    </td>
+    <td className="px-3 py-3.5 text-[11px] text-gray-500">{formatDate(film.date)}</td>
+    <td className="px-3 py-3.5 text-center" onClick={e => e.stopPropagation()}>
+      {film.link ? (
+        <a href={film.link} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center justify-center w-6 h-6 text-indigo-400 hover:text-indigo-300 rounded transition-colors"
+          title="Buka link"
+        >
+          <LinkIcon className="w-3 h-3" />
+        </a>
+      ) : <span className="text-gray-700">—</span>}
+    </td>
+    <td className="px-3 py-3.5 pr-5 text-right" onClick={e => e.stopPropagation()}>
+      <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
+        <button onClick={(e) => { e.stopPropagation(); onEdit(film); }} className="p-1.5 text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors rounded" title="Edit">
+          <Edit2 className="w-3.5 h-3.5" />
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors rounded" title="Hapus">
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </td>
+  </tr>
+));
+TableRow.displayName = 'TableRow';
+
+// ── Helper ──
+function formatDate(date: string | null | undefined): string {
+  if (!date) return '';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// Need React for React.memo
+import React from 'react';
+
+const ITEMS_PER_PAGE = 20;
+const STATS = [
+  { label: 'Total', color: 'text-indigo-400', Icon: Activity, filter: 'Semua Status', key: 'total' as const },
+  { label: 'Selesai', color: 'text-emerald-400', Icon: CheckCircle2, filter: 'Selesai', key: 'completed' as const },
+  { label: 'Watching', color: 'text-amber-400', Icon: Eye, filter: 'Watching', key: 'watching' as const },
+  { label: 'Rencana', color: 'text-blue-400', Icon: Calendar, filter: 'Rencana', key: 'planned' as const },
+] as const;
 
 export default function DashboardPage() {
-  const dragRef = useRef(null);
-  const isDragging = useRef(false);
-  const [showHint, setShowHint] = useState(true);
-  const [filteredData, setFilteredData] = useState<Film[]>([]);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFilm, setEditingFilm] = useState<Film | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ rowIndex: number; id: number } | null>(null);
+
   const { showToast } = useToast();
-
   const { isOnline, triggerSync } = useSyncEngine();
-
-  // Filters dan Data dari context
   const {
-    search, typeFilter, sortBy, statusFilter, setStatusFilter, viewMode, addModalOpen, setAddModalOpen,
+    search, typeFilter, sortBy, statusFilter, setStatusFilter, viewMode,
+    addModalOpen, setAddModalOpen,
     films, setFilms, loadingFilms, setLoadingFilms, dataFetched, setDataFetched
   } = useFilters();
 
-  // Optimasi Performa Mobile: Pagination Sederhana (Virtualisasi Manual)
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const filmsRef = useRef(films);
+  filmsRef.current = films;
 
-  // Reset pagination saat filter / navigasi berubah
-  useEffect(() => {
-    setVisibleCount(ITEMS_PER_PAGE);
-  }, [typeFilter, sortBy, statusFilter, search]);
+  // Reset pagination on filter change
+  useEffect(() => { setVisibleCount(ITEMS_PER_PAGE); }, [typeFilter, sortBy, statusFilter, search]);
 
-  // Modal — sinkronkan dengan addModalOpen dari context (dipakai mobile bottom bar)
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Buka modal jika context addModalOpen berubah jadi true
+  // Open modal from bottom bar
   useEffect(() => {
     if (addModalOpen) {
       setEditingFilm(null);
@@ -49,23 +220,10 @@ export default function DashboardPage() {
       setAddModalOpen(false);
     }
   }, [addModalOpen, setAddModalOpen]);
-  const [editingFilm, setEditingFilm] = useState<Film | null>(null);
-
-  // Alert Modal (Delete Confirm)
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ rowIndex: number, id: number } | null>(null);
 
   const loadData = useCallback(async (isSilent = false) => {
-    // SWR Pattern: If we already have films loaded, load silently in the background
-    const hasCachedData = films.length > 0;
-    const silent = isSilent || hasCachedData;
-
-    if (!isOnline) {
-      if (!silent) setLoadingFilms(false);
-      setDataFetched(true);
-      return;
-    }
-
+    const silent = isSilent || filmsRef.current.length > 0;
+    if (!isOnline) { setDataFetched(true); return; }
     if (!silent) setLoadingFilms(true);
 
     const user = localStorage.getItem('film_username');
@@ -75,90 +233,57 @@ export default function DashboardPage() {
         const result = await fetchFilmData(user, pass);
         setFilms(result);
         setDataFetched(true);
-      } catch (err) {
-        console.error(err);
+      } catch {
         if (!silent) showToast('Gagal memuat data', 'error');
       }
     }
     setLoadingFilms(false);
-  }, [films.length, setFilms, setDataFetched, setLoadingFilms, isOnline, showToast]);
+  }, [setFilms, setDataFetched, setLoadingFilms, isOnline, showToast]);
 
   useEffect(() => {
-    if (!dataFetched) {
-      loadData();
-    }
-
-    // Tutup hint setelah 6 detik
-    const timer = setTimeout(() => setShowHint(false), 6000);
-    return () => clearTimeout(timer);
+    if (!dataFetched) loadData();
   }, [dataFetched, loadData]);
 
-  useEffect(() => {
-    // Apply filters and sorting
-    const lowerSearch = search.toLowerCase();
-    let filtered = films.filter(film => {
-      const matchSearch = film.title.toLowerCase().includes(lowerSearch) ||
-        film.type.toLowerCase().includes(lowerSearch) ||
-        (film.cast || '').toLowerCase().includes(lowerSearch);
-      const matchStatus = statusFilter === 'Semua Status' || film.status === statusFilter;
-      const matchType = typeFilter === 'Semua Kategori' || film.type === typeFilter;
-      return matchSearch && matchStatus && matchType;
-    });
+  // Direct memoized filter + sort: zero extra re-render on search or filter change
+  const filteredData = useMemo(() => {
+    const lower = search.toLowerCase().trim();
+    let result = films;
 
-    // Sort
-    filtered = [...filtered].sort((a, b) => {
-      if (sortBy === 'ID A-Z') return a.id - b.id;
-      if (sortBy === 'ID Z-A') return b.id - a.id;
-      if (sortBy === 'Judul A-Z') return a.title.localeCompare(b.title);
-      if (sortBy === 'Judul Z-A') return b.title.localeCompare(a.title);
-      return a.id - b.id;
-    });
-
-    setFilteredData(filtered);
-  }, [search, statusFilter, typeFilter, sortBy, films]);
-
-  const confirmDelete = async () => {
-    if (!itemToDelete) return;
-    const { rowIndex, id } = itemToDelete;
-
-    // Optimistic UI Update menggunakan functional updater agar instan
-    setFilms((prevFilms: Film[]) => prevFilms.filter(f => f.id !== id));
-
-    // Tambahkan aksi hapus ke antrean offline/sinkronisasi
-    pushOfflineAction({
-       type: 'delete',
-       rowIndex,
-       tempId: id
-    });
-
-    showToast('Film berhasil dihapus', 'success');
-    setItemToDelete(null);
-    setIsAlertOpen(false); // Tutup modal konfirmasi langsung
-
-    // Jalankan sinkronisasi latar belakang jika online
-    if (isOnline) {
-      triggerSync(false).then(success => {
-        if (success) {
-          loadData(true); // silent refresh setelah sync sukses
-        } else {
-          // Jika sync gagal, kita biarkan di antrean, UI tetap ter-update
-          console.warn('[Sync] Gagal menghapus dari server, akan dicoba lagi nanti.');
-        }
+    if (statusFilter !== 'Semua Status' || typeFilter !== 'Semua Kategori' || lower) {
+      result = films.filter(f => {
+        if (statusFilter !== 'Semua Status' && f.status !== statusFilter) return false;
+        if (typeFilter !== 'Semua Kategori' && f.type !== typeFilter) return false;
+        if (lower && !f.title.toLowerCase().includes(lower) &&
+            !f.type.toLowerCase().includes(lower) &&
+            !(f.cast || '').toLowerCase().includes(lower)) return false;
+        return true;
       });
     }
-  };
 
-  const handleDelete = (rowIndex: number, id: number) => {
-    setItemToDelete({ rowIndex, id });
-    setIsAlertOpen(true);
-  };
+    if (sortBy === 'ID Z-A') return [...result].sort((a, b) => b.id - a.id);
+    if (sortBy === 'Judul A-Z') return [...result].sort((a, b) => a.title.localeCompare(b.title));
+    if (sortBy === 'Judul Z-A') return [...result].sort((a, b) => b.title.localeCompare(a.title));
+    return [...result].sort((a, b) => a.id - b.id); // default: ID A-Z
+  }, [search, statusFilter, typeFilter, sortBy, films]);
 
-  const stats = {
-    total: films.length,
-    completed: films.filter(f => f.status === 'Selesai').length,
-    watching: films.filter(f => f.status === 'Watching').length,
-    planned: films.filter(f => f.status === 'Rencana').length,
-  };
+  // Single-pass O(N) stats computation
+  const stats = useMemo(() => {
+    let completed = 0;
+    let watching = 0;
+    let planned = 0;
+    for (let i = 0; i < films.length; i++) {
+      const s = films[i].status;
+      if (s === 'Selesai') completed++;
+      else if (s === 'Watching') watching++;
+      else if (s === 'Rencana') planned++;
+    }
+    return {
+      total: films.length,
+      completed,
+      watching,
+      planned,
+    };
+  }, [films]);
 
   const handleEditClick = useCallback((film: Film) => {
     setEditingFilm(film);
@@ -170,291 +295,108 @@ export default function DashboardPage() {
     setIsAlertOpen(true);
   }, []);
 
-  const memoizedGridView = useMemo(() => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-5">
-        {filteredData.slice(0, visibleCount).map((film, index) => {
-          return (
-            <div
-              key={film.id}
-              className="relative group flex flex-col bg-[#0f141f] hover:bg-[#131926] border border-white/[0.03] hover:border-indigo-500/20 rounded-xl p-3 md:p-5 transition-all duration-300 shadow-xl shadow-black/20 overflow-hidden"
-            >
-              {/* Subtle accent for hover depth */}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+  const confirmDelete = useCallback(async () => {
+    if (!itemToDelete) return;
+    const { rowIndex, id } = itemToDelete;
+    setFilms(prev => prev.filter(f => f.id !== id));
+    pushOfflineAction({ type: 'delete', rowIndex, tempId: id });
+    showToast('Film berhasil dihapus', 'success');
+    setItemToDelete(null);
+    setIsAlertOpen(false);
+    if (isOnline) {
+      triggerSync(false).then(ok => { if (ok) loadData(true); });
+    }
+  }, [itemToDelete, setFilms, showToast, isOnline, triggerSync, loadData]);
 
-              <div className="flex justify-between items-center mb-3 md:mb-5 relative z-10">
-                <span className="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-wider">ID</span>
-                <span className="text-[11px] md:text-[12px] font-black text-white">#{film.id}</span>
-              </div>
-
-              <div className="mb-3 md:mb-4 relative z-10">
-                <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Judul</span>
-                <h3 className="text-[14px] md:text-[16px] font-bold text-white leading-tight line-clamp-2">{film.title}</h3>
-              </div>
-
-              <div className="mb-4 md:mb-5 relative z-10">
-                <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Cast</span>
-                <p className="text-[11px] md:text-[13px] font-medium text-gray-300 line-clamp-2 leading-relaxed">{film.cast || '-'}</p>
-              </div>
-
-              <div className="flex gap-2 md:gap-4 mb-4 md:mb-5 relative z-10">
-                <div className="flex-1">
-                  <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Tipe</span>
-                  <span className="inline-block px-2 md:px-3 py-1 md:py-1.5 rounded-md bg-white/[0.03] border border-white/5 text-[10px] md:text-[11px] font-medium text-gray-300">
-                    {film.type}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Episode</span>
-                  <span className="text-[12px] md:text-[13px] font-bold text-white">{film.episodes || '-'}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 md:gap-4 mb-4 md:mb-5 relative z-10">
-                <div className="flex-1">
-                  <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Status</span>
-                  <span className={`inline-block px-2 py-1 md:px-2.5 md:py-1.5 rounded-md text-[9px] md:text-[10px] font-black tracking-wider uppercase
-                    ${film.status === 'Selesai' ? 'bg-emerald-500/10 text-emerald-500' :
-                      film.status === 'Watching' ? 'bg-amber-500/10 text-amber-500' :
-                        film.status === 'Rencana' ? 'bg-blue-500/10 text-blue-500' :
-                          'bg-red-500/10 text-red-500'}`}
-                  >
-                    {film.status === 'Watching' ? 'Watching' : film.status}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Tanggal</span>
-                  <span className="text-[11px] md:text-[13px] font-bold text-white">
-                    {film.date ? (() => {
-                      const d = new Date(film.date);
-                      if (isNaN(d.getTime())) return '-';
-                      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-                    })() : '-'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mb-4 md:mb-6 relative z-10">
-                <span className="block text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Link</span>
-                {film.link ? (
-                  <a href={film.link} target="_blank" rel="noopener noreferrer" className="text-[11px] md:text-[13px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors line-clamp-1 underline underline-offset-2">
-                    {film.link}
-                  </a>
-                ) : (
-                  <span className="text-[14px] font-bold text-gray-300">-</span>
-                )}
-              </div>
-
-              <div className="mt-auto flex items-end justify-between relative z-10">
-                <span className="text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 md:mb-3">Aksi</span>
-                <div className="flex gap-1.5 md:gap-2">
-                  <button onClick={() => handleEditClick(film)} className="p-2 md:p-3 rounded-md md:rounded-lg bg-white/[0.04] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-indigo-500/30 transition-all active:scale-95" title="Edit">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDeleteClick(film.rowIndex, film.id)} className="p-2 md:p-3 rounded-md md:rounded-lg bg-white/[0.04] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-red-500/30 transition-all active:scale-95" title="Hapus">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }, [filteredData, visibleCount, handleEditClick, handleDeleteClick]);
-
-  const memoizedTableView = useMemo(() => {
-    return (
-      <div className="overflow-x-auto w-full pb-8">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-white/[0.02] border-b border-white/5 text-gray-500 text-[10px] font-bold uppercase tracking-[0.15em]">
-              <th className="px-3 py-3 pl-4">ID</th>
-              <th className="px-3 py-3">JUDUL</th>
-              <th className="px-3 py-3">CAST</th>
-              <th className="px-3 py-3">TIPE</th>
-              <th className="px-3 py-3 text-center">EPS</th>
-              <th className="px-3 py-3">STATUS</th>
-              <th className="px-3 py-3">TANGGAL</th>
-              <th className="px-3 py-3">LINK</th>
-              <th className="px-3 py-3 text-right pr-4">AKSI</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {filteredData.slice(0, visibleCount).map((film, index) => (
-              <tr
-                key={film.id}
-                className={`border-b border-white/[0.02] last:border-0 hover:bg-white/[0.02] transition-colors ${index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.01]'}`}
-              >
-                <td className="px-3 py-3 pl-4 text-[12px] font-bold text-gray-600">#{film.id}</td>
-                <td className="px-3 py-3">
-                  <span className="text-[13px] font-bold text-white line-clamp-1">{film.title}</span>
-                </td>
-                <td className="px-3 py-3 text-[12px] font-medium text-gray-400 max-w-[200px] truncate" title={film.cast}>{film.cast || '-'}</td>
-                <td className="px-3 py-3">
-                  <span className="px-2 py-0.5 rounded bg-white/5 text-[10px] font-bold text-gray-500 border border-white/5">{film.type}</span>
-                </td>
-                <td className="px-3 py-3 text-center text-[13px] font-black text-indigo-400">{film.episodes || '0'}</td>
-                <td className="px-3 py-3">
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase border
-                    ${film.status === 'Selesai' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                      film.status === 'Watching' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                        film.status === 'Rencana' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                          'bg-red-500/10 text-red-400 border-red-500/20'}`}
-                  >
-                    {film.status === 'Watching' ? 'Watching' : film.status}
-                  </span>
-                </td>
-                <td className="px-3 py-3 text-[11px] font-semibold text-gray-400">
-                  {film.date ? (() => {
-                    const d = new Date(film.date);
-                    if (isNaN(d.getTime())) return '-';
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-                  })() : '-'}
-                </td>
-                <td className="px-3 py-3 text-center">
-                  {film.link ? (
-                    <a href={film.link} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/25 transition-all inline-block">
-                      <LinkIcon className="w-3 h-3" />
-                    </a>
-                  ) : (
-                    <span className="text-gray-700">-</span>
-                  )}
-                </td>
-                <td className="px-3 py-3 pr-4 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <button
-                      onClick={() => handleEditClick(film)}
-                      className="p-2 rounded-md text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all active:scale-95"
-                      title="Edit"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(film.rowIndex, film.id)}
-                      className="p-2 rounded-md text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all active:scale-95"
-                      title="Hapus"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }, [filteredData, visibleCount, handleEditClick, handleDeleteClick]);
-
-  // Load More Handler
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + ITEMS_PER_PAGE);
-  };
+  // Only render the active view — don't compute both
+  const visibleData = filteredData.slice(0, visibleCount);
 
   return (
     <div className="space-y-4">
       {/* Offline Banner */}
       {!isOnline && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-amber-500/20 text-amber-500">
-              <WifiOff className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[13px] md:text-sm font-bold text-amber-500 leading-tight">Anda Sedang Offline</p>
-              <p className="text-[10px] md:text-[11px] text-amber-500/80 mt-0.5">Perubahan otomatis disimpan ke perangkat dan disinkron saat online.</p>
-            </div>
+        <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-lg p-3.5 flex items-center gap-3">
+          <WifiOff className="w-4 h-4 text-amber-500 flex-none" />
+          <div>
+            <p className="text-[12px] font-semibold text-amber-400">Offline</p>
+            <p className="text-[10px] text-amber-500/60 mt-0.5">Perubahan disimpan lokal dan disinkron saat online.</p>
           </div>
         </div>
       )}
 
-
-      {/* Stats overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
-        {[
-          { label: 'Total Koleksi', value: stats.total, color: 'text-indigo-400', bg: 'bg-indigo-500/5', border: 'border-indigo-500/20', activeBorder: 'border-indigo-500/60 shadow-[0_0_15px_-3px_rgba(99,102,241,0.3)]', Icon: Activity, filter: 'Semua Status' },
-          { label: 'Selesai Ditonton', value: stats.completed, color: 'text-emerald-400', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', activeBorder: 'border-emerald-500/60 shadow-[0_0_15px_-3px_rgba(16,185,129,0.3)]', Icon: CheckCircle2, filter: 'Selesai' },
-          { label: 'Watching', value: stats.watching, color: 'text-amber-400', bg: 'bg-amber-500/5', border: 'border-amber-500/20', activeBorder: 'border-amber-500/60 shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)]', Icon: Eye, filter: 'Watching' },
-          { label: 'Daftar Rencana', value: stats.planned, color: 'text-blue-400', bg: 'bg-blue-500/5', border: 'border-blue-500/20', activeBorder: 'border-blue-500/60 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]', Icon: Calendar, filter: 'Rencana' },
-        ].map((stat, i) => {
-          const isActive = statusFilter === stat.filter;
-          return (
-            <GlassCard
-              key={i}
-              onClick={() => setStatusFilter(stat.filter)}
-              className={`p-3 md:p-3.5 border cursor-pointer transition-all duration-300 relative group overflow-hidden ${isActive ? stat.activeBorder : `${stat.border} ${stat.bg}`} hover:border-white/20`}
-            >
-              <div className="flex items-center gap-3.5 relative z-10">
-                <div className={`flex-none p-2 rounded-lg ${stat.bg} ${stat.border} border group-hover:scale-110 transition-transform duration-500 ${isActive ? 'bg-white/10' : ''}`}>
-                  <stat.Icon className={`w-4 h-4 ${stat.color}`} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] md:text-[11px] font-medium text-gray-500 tracking-wider uppercase">{stat.label}</p>
-                  <p className="text-xl md:text-2xl font-black text-white mt-0.5">
-                    {loadingFilms ? <Loader2 className="w-5 h-5 animate-spin opacity-20" /> : stat.value}
-                  </p>
-                </div>
-              </div>
-
-              {/* Subtle background icon for depth */}
-              <stat.Icon className={`absolute -right-2 -bottom-2 w-14 h-14 ${stat.color} opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-700 -rotate-12`} />
-
-              {/* Decorative accent for active state */}
-              {isActive && (
-                <motion.div
-                  layoutId="active-nav-bg"
-                  className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none"
-                />
-              )}
-            </GlassCard>
-          );
-        })}
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+        {STATS.map(s => (
+          <StatCard
+            key={s.filter}
+            label={s.label}
+            value={stats[s.key]}
+            color={s.color}
+            Icon={s.Icon}
+            isActive={statusFilter === s.filter}
+            loading={loadingFilms}
+            onClick={() => setStatusFilter(s.filter)}
+          />
+        ))}
       </div>
 
-
-      {/* Data Table / Grid View */}
-      <GlassCard className={`!p-0 overflow-hidden ${viewMode === 'grid' ? '!bg-transparent !border-none !backdrop-blur-none !shadow-none' : ''}`}>
-        <div className="w-full">
-          {loadingFilms ? (
-            <div className="flex justify-center items-center py-20 text-dark-600">
-              <Loader2 className="animate-spin w-8 h-8 mr-3" /> Memuat Data...
+      {/* Data View */}
+      <div className={`overflow-hidden ${viewMode === 'grid' ? '' : 'bg-[#0c1018] border border-white/[0.04] rounded-lg'}`}>
+        {loadingFilms ? (
+          <div className="flex justify-center items-center py-20 gap-2.5 text-gray-600 text-sm">
+            <Loader2 className="animate-spin w-4 h-4" />
+            Memuat data...
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="text-center py-20 text-gray-600">
+            <FilmIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
+            <p className="text-sm font-medium">Tidak ada data ditemukan</p>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+              {visibleData.map(film => (
+                <GridCard key={film.id} film={film} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+              ))}
             </div>
-          ) : filteredData.length === 0 ? (
-            <div className="text-center py-20 text-dark-600">
-              <CheckCircle2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Tidak ada data ditemukan.</p>
+            {visibleCount < filteredData.length && (
+              <div className="flex justify-center py-6">
+                <button onClick={() => setVisibleCount(p => p + ITEMS_PER_PAGE)}
+                  className="flex items-center gap-2 px-5 py-2 text-[11px] font-medium text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] rounded transition-colors">
+                  Tampilkan lebih banyak <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="overflow-x-auto w-full pb-8">
+              <table className="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-white/[0.05] text-gray-600 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                    {['ID','JUDUL','CAST','TIPE','EPS','STATUS','TANGGAL','LINK','AKSI'].map((h, i) => (
+                      <th key={h} className={`px-3 py-3 ${i === 0 ? 'pl-5' : ''} ${i === 8 ? 'text-right pr-5' : ''} ${i === 4 ? 'text-center' : ''}`}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleData.map((film, index) => (
+                    <TableRow key={film.id} film={film} index={index} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ) : (
-            <>
-              {viewMode === 'grid' ? (
-                <div>
-                  {memoizedGridView}
-                </div>
-              ) : (
-                <div>
-                  {memoizedTableView}
-                </div>
-              )}
-
-              {/* Load More Button */}
-              {visibleCount < filteredData.length && (
-                <div className="flex justify-center mt-2 mb-8 md:mb-10 w-full relative z-20">
-                  <button
-                    onClick={handleLoadMore}
-                    className="px-6 py-2.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[11px] md:text-sm font-bold tracking-wider uppercase hover:bg-indigo-500/20 transition-all active:scale-95 flex items-center gap-2"
-                  >
-                    Tampilkan Lebih Banyak
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </GlassCard>
+            {visibleCount < filteredData.length && (
+              <div className="flex justify-center py-6">
+                <button onClick={() => setVisibleCount(p => p + ITEMS_PER_PAGE)}
+                  className="flex items-center gap-2 px-5 py-2 text-[11px] font-medium text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] rounded transition-colors">
+                  Tampilkan lebih banyak <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       <FilmModal
         isOpen={isModalOpen}
@@ -469,72 +411,19 @@ export default function DashboardPage() {
         onConfirm={confirmDelete}
         title="Hapus Film?"
         message="Tindakan ini tidak dapat dibatalkan. Film akan dihapus permanen dari koleksi Anda."
-        confirmText="Hapus Sekarang"
+        confirmText="Hapus"
         type="danger"
       />
 
       {/* FAB — desktop only */}
-      <motion.div ref={dragRef} className="fixed inset-0 pointer-events-none z-40 hidden md:block" />
-
-      <motion.button
-        drag
-        dragConstraints={dragRef}
-        dragElastic={0.05}
-        dragMomentum={true}
-        dragTransition={{
-          power: 0.4,
-          bounceStiffness: 600,
-          bounceDamping: 60,
-          timeConstant: 200
-        }}
-        onPointerDown={() => {
-          isDragging.current = false;
-          setShowHint(false);
-        }}
-        onDrag={() => (isDragging.current = true)}
-        whileDrag={{ scale: 1.1, cursor: 'grabbing', filter: 'brightness(1.1)' }}
-        onTap={() => {
-          if (!isDragging.current) {
-            setEditingFilm(null);
-            setIsModalOpen(true);
-          }
-        }}
-        className="hidden md:flex fixed bottom-6 right-6 z-[45] items-center justify-center p-0 w-[62px] h-[62px] rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 text-white shadow-[0_10px_40px_-6px_rgba(99,102,241,0.7)] group hover:shadow-[0_15px_50px_-6px_rgba(139,92,246,0.9)] pointer-events-auto active:scale-95"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.3 }}
-        whileTap={{ scale: 0.95 }}
+      <div ref={dragRef} className="fixed inset-0 pointer-events-none z-40 hidden md:block" />
+      <button
+        className="hidden md:flex fixed bottom-6 right-6 z-[45] items-center justify-center w-12 h-12 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white shadow-[0_4px_20px_rgba(99,102,241,0.35)] pointer-events-auto transition-colors duration-150"
+        onClick={() => { setEditingFilm(null); setIsModalOpen(true); }}
         title="Tambah Koleksi Baru"
       >
-        <AnimatePresence>
-          {showHint && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.5 }}
-              animate={{ opacity: 1, y: -45, scale: 1 }}
-              exit={{ opacity: 0, y: 0, scale: 0.5 }}
-              className="absolute right-0 whitespace-nowrap px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 text-[11px] font-bold text-white shadow-2xl pointer-events-none z-[60]"
-              style={{ top: 0 }}
-            >
-              Coba gerakkan saya 👋
-              <div className="absolute bottom-[-5px] right-[24px] w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white/30" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-full font-inherit">
-          <div className="absolute inset-0 border-2 border-white/20 rounded-full scale-110 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <motion.div
-            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            animate={{ translateX: ['-100%', '200%'] }}
-            transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", repeatDelay: 1 }}
-          />
-          <div className="relative flex items-center justify-center">
-            <Sparkles className="absolute -top-3 -right-3 w-[14px] h-[14px] text-purple-200 opacity-0 group-hover:opacity-100 group-hover:-top-[18px] group-hover:-right-[18px] transition-all duration-[400ms] delay-75 pointer-events-none" />
-            <Sparkles className="absolute -bottom-3 -left-3 w-[10px] h-[10px] text-indigo-300 opacity-0 group-hover:opacity-100 group-hover:-bottom-[16px] group-hover:-left-[16px] transition-all duration-[400ms] pointer-events-none" />
-            <FolderPlus className="w-[22px] h-[22px] group-hover:scale-110 transition-transform duration-300 flex-shrink-0 drop-shadow-md z-10 relative" strokeWidth={2.5} />
-          </div>
-        </div>
-      </motion.button>
+        <Plus className="w-5 h-5" strokeWidth={2} />
+      </button>
     </div>
   );
 }

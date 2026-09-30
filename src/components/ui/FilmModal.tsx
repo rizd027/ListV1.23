@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Loader2, Clapperboard, Link as LinkIcon, Layers, Activity, Hash, Calendar, Edit2, PlusCircle, ChevronDown, Mic, Camera, Radio, Square, type LucideIcon } from 'lucide-react';
+import { X, Loader2, Clapperboard, Link as LinkIcon, Layers, Activity, Hash, Calendar, Edit2, Plus, Minus, ChevronDown, Mic, Camera, Radio, Square, type LucideIcon } from 'lucide-react';
 import type { Film } from '@/lib/api';
 import { useFilters } from '@/context/FilterContext';
 import { pushOfflineAction } from '@/lib/sync';
@@ -19,14 +19,61 @@ interface CustomSelectProps {
 function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number; placeAbove?: boolean }>({
+    top: 0,
+    left: 0,
+    width: 0,
+    placeAbove: false,
+  });
+
+  const updatePosition = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // If space below is less than 210px and space above is larger, open upwards
+      const placeAbove = spaceBelow < 210 && rect.top > 210;
+      setCoords({
+        top: placeAbove ? rect.top - 4 : rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        placeAbove,
+      });
+    }
+  };
+
+  const handleToggle = () => {
+    if (!open) {
+      updatePosition();
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
 
   useEffect(() => {
+    if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (
+        ref.current && !ref.current.contains(e.target as Node) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
     };
+    const handleScrollOrResize = () => {
+      updatePosition();
+    };
+
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+    window.addEventListener('resize', handleScrollOrResize);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      window.removeEventListener('resize', handleScrollOrResize);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+    };
+  }, [open]);
 
   const selected = options.find(o => o.value === value) || options[0];
 
@@ -34,8 +81,8 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
     <div ref={ref} className="relative w-full">
       <button
         type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between bg-slate-900/40 border border-white/8 rounded-lg pl-9 pr-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-indigo-500/40 transition-colors font-medium"
+        onClick={handleToggle}
+        className="w-full flex items-center justify-between bg-[#0d1020] border border-white/[0.06] rounded pl-9 pr-3 py-2.5 text-[12px] text-white focus:outline-none focus:border-indigo-500/30 transition-colors font-medium"
       >
         <span className="absolute left-3 top-1/2 -translate-y-1/2">
           <Icon className="w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
@@ -44,31 +91,36 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
         <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown — CSS visibility, no motion */}
-      <div
-        className="absolute z-[80] w-full mt-1 p-1 flex flex-col gap-0.5 rounded-lg border border-white/8 shadow-xl overflow-hidden transition-all duration-150"
-        style={{
-          background: '#0c0f1d',
-          opacity: open ? 1 : 0,
-          transform: open ? 'translateY(0) scaleY(1)' : 'translateY(-4px) scaleY(0.95)',
-          pointerEvents: open ? 'auto' : 'none',
-          transformOrigin: 'top',
-        }}
-      >
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => { onChange(option.value); setOpen(false); }}
-            className={`w-full text-left px-3 py-2 rounded-md text-[12px] font-medium transition-colors ${value === option.value
-              ? 'bg-indigo-500/20 text-indigo-300'
-              : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+      {/* Dropdown — rendered in Portal directly into document.body to avoid being clipped by any modal container */}
+      {open && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9999] p-1 flex flex-col gap-0.5 rounded-lg border border-white/[0.08] shadow-[0_16px_40px_rgba(0,0,0,0.85)] max-h-60 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{
+            background: '#0c0f1d',
+            width: coords.width,
+            left: coords.left,
+            top: coords.placeAbove ? undefined : coords.top,
+            bottom: coords.placeAbove ? (window.innerHeight - coords.top) : undefined,
+          }}
+        >
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => { onChange(option.value); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 rounded text-[12px] font-medium transition-colors ${
+                value === option.value
+                  ? 'bg-indigo-500/20 text-indigo-300'
+                  : 'text-gray-400 hover:bg-white/[0.05] hover:text-white'
               }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
@@ -255,13 +307,15 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
   const audioChunksRef = useRef<Blob[]>([]);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Cancel recording on close
+  // Cancel recording on close + reset step
   useEffect(() => {
     if (!isOpen) {
       cancelRecording();
+      setStep(0);
     }
   }, [isOpen]);
 
@@ -513,262 +567,349 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
     }
   };
 
-  const inputCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg pl-9 pr-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium";
-  const inputNoIconCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium text-center";
-  const textareaCls = "w-full bg-[#0d1020] border border-white/[0.07] rounded-lg px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors font-medium resize-none";
-  const labelCls = "text-[9px] font-bold text-gray-500 uppercase tracking-widest ml-0.5 block mb-1";
+  const inputCls = "w-full bg-[#0d1020] border border-white/[0.06] rounded pl-9 pr-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors font-medium";
+  const inputNoIconCls = "w-full bg-[#0d1020] border border-white/[0.06] rounded px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors font-medium text-center";
+  const textareaCls = "w-full bg-[#0d1020] border border-white/[0.06] rounded px-3 py-2.5 text-[12px] text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors font-medium resize-none";
+  const labelCls = "text-[9px] font-bold text-gray-600 uppercase tracking-widest ml-0.5 block mb-1";
 
   if (!mounted || !isOpen) return null;
 
+  const STEPS = ['Informasi', 'Detail', 'Catatan'];
+
   return createPortal(
     <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center">
-      {/* Backdrop — dark only, no blur, no transition */}
-      <div
-        className="absolute inset-0 bg-black/75"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
 
-      {/* Modal panel — no transition */}
-      <div className="relative w-full h-full sm:h-auto sm:max-w-[560px] z-10">
+      <div className="relative w-full h-full sm:h-auto sm:max-w-[520px] z-10">
         <form
-          onSubmit={handleSubmit}
-          className="w-full h-full sm:h-auto sm:rounded-xl overflow-hidden rounded-none flex flex-col"
+          onSubmit={e => {
+            e.preventDefault();
+            if (step < 2) { setStep(s => s + 1); return; }
+            handleSubmit(e);
+          }}
+          className="w-full h-full sm:h-auto sm:rounded-lg overflow-hidden rounded-none flex flex-col"
           style={{
             background: '#0e1120',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.65)',
           }}
         >
-          {/* Header */}
-          <div className="flex-none flex items-center justify-between px-4 py-3.5 border-b border-white/[0.05]">
-            <div className="flex items-center gap-2">
-              <div className="p-1 bg-indigo-500/10 border border-indigo-500/20 rounded-sm">
-                {filmToEdit
-                  ? <Edit2 className="w-3.5 h-3.5 text-indigo-400" />
-                  : <PlusCircle className="w-3.5 h-3.5 text-indigo-400" />}
-              </div>
-              <h2 className="text-sm font-bold text-white tracking-tight">
+          {/* ── Header ── */}
+          <div className="flex-none px-4 pt-4 pb-0">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[13px] font-semibold text-white tracking-tight">
                 {filmToEdit ? 'Edit Koleksi' : 'Tambah Koleksi'}
               </h2>
+              <button type="button" onClick={onClose}
+                className="p-1.5 rounded text-gray-600 hover:text-white hover:bg-white/[0.05] transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+
+            {/* ── Flat Stepper ── */}
+            <div className="flex items-stretch border-b border-white/[0.06]">
+              {STEPS.map((label, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { if (i <= step || Boolean(formData.title)) setStep(i); }}
+                  className="relative flex-1 flex flex-col items-center gap-1 pb-3"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold flex-none
+                      ${i < step ? 'bg-indigo-500 text-white' :
+                        i === step ? 'bg-white/[0.08] text-white' :
+                        'bg-transparent text-gray-600'}`}>
+                      {i < step ? '✓' : i + 1}
+                    </span>
+                    <span className={`text-[11px] font-medium transition-colors
+                      ${i === step ? 'text-white' : i < step ? 'text-indigo-400' : 'text-gray-600'}`}>
+                      {label}
+                    </span>
+                  </div>
+                  {/* Active underline */}
+                  <div className={`absolute bottom-0 left-3 right-3 h-[1.5px] rounded-full transition-colors
+                    ${i === step ? 'bg-indigo-500' : i < step ? 'bg-indigo-500/30' : 'bg-transparent'}`} />
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Scrollable Form Fields */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 sm:max-h-[60vh]">
-            {/* Judul */}
-            <div>
-              <label className={labelCls}>Judul Koleksi <span className="text-red-400">*</span></label>
-              <div className="relative">
-                <Clapperboard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
-                <input
-                  required type="text"
-                  placeholder="Judul anime/donghua..."
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className={inputCls}
-                />
-              </div>
-            </div>
+          {/* ── Step Content ── */}
+          <div className="flex-1 px-4 py-5 space-y-4 min-h-[220px] sm:min-h-[240px] sm:max-h-[60vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
-            {/* Link */}
-            <div>
-              <label className={labelCls}>Link (Opsional)</label>
-              <div className="relative">
-                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
-                <input
-                  type="url" placeholder="URL..."
-                  value={formData.link}
-                  onChange={e => setFormData({ ...formData, link: e.target.value })}
-                  className={inputCls}
-                />
-              </div>
-            </div>
-
-            {/* Tipe & Status */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className={labelCls}>Tipe <span className="text-red-400">*</span></label>
-                <CustomSelect
-                  value={formData.type as string}
-                  onChange={v => setFormData({ ...formData, type: v })}
-                  options={TIPE_OPTIONS}
-                  icon={Layers}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Status <span className="text-red-400">*</span></label>
-                <CustomSelect
-                  value={formData.status as string}
-                  onChange={v => {
-                    setFormData({ ...formData, status: v });
-                    if (v === 'Selesai') {
-                      if (!totalEps && watched) {
-                        setTotalEps(watched);
-                      }
-                    } else {
-                      if (totalEps && totalEps === watched) {
-                        setTotalEps('');
-                      }
-                    }
-                  }}
-                  options={STATUS_OPTIONS}
-                  icon={Activity}
-                />
-              </div>
-            </div>
-
-            {/* Episode & Tanggal */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className={labelCls}>Episode</label>
-                <div className="flex items-center gap-1.5">
-                  <div className="relative flex-1">
-                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
+            {/* STEP 1 — Informasi */}
+            {step === 0 && (
+              <>
+                <div>
+                  <label className={labelCls}>Judul Koleksi <span className="text-red-400">*</span></label>
+                  <div className="relative">
+                    <Clapperboard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
                     <input
-                      type="number" min="0" placeholder="Tonton"
-                      value={watched}
-                      onChange={e => setWatched(e.target.value)}
+                      required type="text"
+                      placeholder="Judul anime/donghua..."
+                      value={formData.title}
+                      onChange={e => setFormData({ ...formData, title: e.target.value })}
+                      className={inputCls}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelCls}>Link (Opsional)</label>
+                  <div className="relative">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
+                    <input
+                      type="url" placeholder="URL..."
+                      value={formData.link}
+                      onChange={e => setFormData({ ...formData, link: e.target.value })}
                       className={inputCls}
                     />
                   </div>
-                  <span className="text-gray-500 font-bold text-[10px]">/</span>
-                  <div className="relative flex-1">
-                    <input
-                      type="number" min="0" placeholder="Total"
-                      value={totalEps}
-                      onChange={e => setTotalEps(e.target.value)}
-                      className={inputNoIconCls}
+                </div>
+
+                {/* AI Input */}
+                <div>
+                  <label className={labelCls}>Input AI</label>
+                  <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageSelected} />
+                  {recording ? (
+                    <div className="flex items-center justify-between gap-2 px-3 py-2.5 border border-rose-500/15 bg-rose-500/[0.04] rounded">
+                      <div className="flex items-center gap-2">
+                        <Radio className="w-3.5 h-3.5 text-rose-500 animate-ping" />
+                        <span className="text-[11px] text-rose-300">{formatDuration(recordingDuration)}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <button type="button" onClick={stopRecording}
+                          className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 rounded transition-colors">
+                          <Square className="w-3.5 h-3.5 fill-emerald-400" />
+                        </button>
+                        <button type="button" onClick={cancelRecording}
+                          className="p-1.5 text-gray-500 hover:text-white hover:bg-white/[0.05] rounded transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : aiLoading ? (
+                    <div className="flex items-center gap-2 px-3 py-2.5 border border-white/[0.05] rounded">
+                      <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin flex-none" />
+                      <span className="text-[11px] text-indigo-300/70">{aiStatusText || 'AI sedang bekerja...'}</span>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button type="button" onClick={startRecording}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] font-medium text-gray-400 hover:text-white border border-white/[0.06] hover:bg-white/[0.05] rounded transition-colors">
+                        <Mic className="w-4 h-4" /> Suara
+                      </button>
+                      <button type="button" onClick={handleImageScanClick}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] font-medium text-gray-400 hover:text-white border border-white/[0.06] hover:bg-white/[0.05] rounded transition-colors">
+                        <Camera className="w-4 h-4" /> Scan
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* STEP 2 — Detail */}
+            {step === 1 && (
+              <>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className={labelCls}>Tipe <span className="text-red-400">*</span></label>
+                    <CustomSelect
+                      value={formData.type as string}
+                      onChange={v => setFormData({ ...formData, type: v })}
+                      options={TIPE_OPTIONS}
+                      icon={Layers}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Status <span className="text-red-400">*</span></label>
+                    <CustomSelect
+                      value={formData.status as string}
+                      onChange={v => {
+                        setFormData({ ...formData, status: v });
+                        if (v === 'Selesai') {
+                          if (!totalEps && watched) setTotalEps(watched);
+                        } else {
+                          if (totalEps && totalEps === watched) setTotalEps('');
+                        }
+                      }}
+                      options={STATUS_OPTIONS}
+                      icon={Activity}
                     />
                   </div>
                 </div>
-              </div>
-              <div>
-                <label className={labelCls}>Tanggal</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
-                  <input
-                     type="date"
-                     value={formData.date || ''}
-                     onChange={e => setFormData({ ...formData, date: e.target.value })}
-                     className={`${inputCls} [color-scheme:dark]`}
+
+                {/* Episode — Full Width */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className={labelCls.replace('mb-1', '')}>Episode</label>
+                    {totalEps && watched && (
+                      <span className="text-[10px] font-mono text-indigo-400">
+                        {Math.min(100, Math.round((parseInt(watched, 10) || 0) / (parseInt(totalEps, 10) || 1) * 100))}% Selesai
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Tonton Stepper */}
+                    <div className="flex-1 flex items-center bg-[#0d1020] border border-white/[0.06] rounded focus-within:border-indigo-500/30 transition-colors overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setWatched(prev => {
+                          const val = parseInt(prev, 10);
+                          if (isNaN(val) || val <= 0) return '';
+                          return String(val - 1);
+                        })}
+                        className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/[0.05] active:bg-white/[0.1] transition-colors border-r border-white/[0.04] flex-none"
+                        title="Kurang 1 episode"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Tonton"
+                        value={watched}
+                        onChange={e => setWatched(e.target.value)}
+                        className="w-full bg-transparent py-2 text-center text-[12px] font-semibold text-white placeholder:text-gray-600 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setWatched(prev => {
+                          const val = parseInt(prev, 10);
+                          const nextVal = isNaN(val) ? 1 : val + 1;
+                          if (totalEps && nextVal >= parseInt(totalEps, 10)) {
+                            setFormData(f => ({ ...f, status: 'Selesai' }));
+                          }
+                          return String(nextVal);
+                        })}
+                        className="w-9 h-9 flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 active:bg-indigo-500/20 transition-colors border-l border-white/[0.04] flex-none"
+                        title="Tambah 1 episode"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <span className="text-gray-600 text-[11px] font-bold flex-none">/</span>
+
+                    {/* Total Stepper */}
+                    <div className="flex-1 flex items-center bg-[#0d1020] border border-white/[0.06] rounded focus-within:border-indigo-500/30 transition-colors overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setTotalEps(prev => {
+                          const val = parseInt(prev, 10);
+                          if (isNaN(val) || val <= 0) return '';
+                          return String(val - 1);
+                        })}
+                        className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/[0.05] active:bg-white/[0.1] transition-colors border-r border-white/[0.04] flex-none"
+                        title="Kurang total episode"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Total"
+                        value={totalEps}
+                        onChange={e => setTotalEps(e.target.value)}
+                        className="w-full bg-transparent py-2 text-center text-[12px] font-medium text-white placeholder:text-gray-600 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setTotalEps(prev => {
+                          const val = parseInt(prev, 10);
+                          return String(isNaN(val) ? 1 : val + 1);
+                        })}
+                        className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/[0.05] active:bg-white/[0.1] transition-colors border-l border-white/[0.04] flex-none"
+                        title="Tambah total episode"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tanggal — Full Width below Episode */}
+                <div>
+                  <label className={labelCls}>Tanggal</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400/60 pointer-events-none" />
+                    <input
+                      type="date"
+                      value={formData.date || ''}
+                      onChange={e => setFormData({ ...formData, date: e.target.value })}
+                      className={`${inputCls} [color-scheme:dark]`}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STEP 3 — Catatan */}
+            {step === 2 && (
+              <>
+                <div>
+                  <label className={labelCls}>Cast (Opsional)</label>
+                  <textarea
+                    placeholder="Aktor/Aktris..."
+                    value={formData.cast}
+                    onChange={e => setFormData({ ...formData, cast: e.target.value })}
+                    rows={3}
+                    className={textareaCls}
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* Cast & Review */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div>
-                <label className={labelCls}>Cast (Opsi)</label>
-                <textarea
-                  placeholder="Aktor/Aktris..."
-                  value={formData.cast}
-                  onChange={e => setFormData({ ...formData, cast: e.target.value })}
-                  rows={2}
-                  className={textareaCls}
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Review</label>
-                <textarea
-                  placeholder="Catatan..."
-                  value={formData.notes || ''}
-                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                  rows={2}
-                  className={textareaCls}
-                />
-              </div>
-            </div>
+                <div>
+                  <label className={labelCls}>Review / Catatan</label>
+                  <textarea
+                    placeholder="Catatan pribadi..."
+                    value={formData.notes || ''}
+                    onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                    rows={3}
+                    className={textareaCls}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Footer (Actions & AI Input in one single row) */}
-          <div className="flex-none p-4 border-t border-white/[0.05] bg-[#0e1120]">
-            <input 
-              type="file" 
-              accept="image/*" 
-              ref={fileInputRef} 
-              className="hidden" 
-              onChange={handleImageSelected} 
-            />
+          {/* ── Footer Navigation ── */}
+          <div className="flex-none px-4 py-3.5 border-t border-white/[0.05] flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setStep(s => Math.max(0, s - 1))}
+              disabled={step === 0}
+              className="h-9 px-4 rounded text-[12px] font-medium text-gray-400 hover:text-white border border-white/[0.06] hover:bg-white/[0.05] transition-colors disabled:opacity-0 disabled:pointer-events-none"
+            >
+              ← Kembali
+            </button>
 
-            {recording ? (
-              /* Recording Mode takes the full row */
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-center justify-between gap-3 shadow-lg shadow-rose-500/5 animate-pulse w-full">
-                <div className="flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-rose-500 animate-ping" />
-                  <span className="text-[10px] font-bold text-rose-300 uppercase tracking-widest">
-                    Mendengarkan... ({formatDuration(recordingDuration)})
-                  </span>
-                </div>
-                <div className="flex gap-1.5">
-                  <button
-                    type="button"
-                    onClick={stopRecording}
-                    className="p-1.5 rounded-md bg-emerald-500 text-white hover:bg-emerald-600 active:scale-90 transition-all"
-                    title="Selesai dan Transkripsi"
-                  >
-                    <Square className="w-3.5 h-3.5 fill-white" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancelRecording}
-                    className="p-1.5 rounded-md bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 active:scale-90 transition-all"
-                    title="Batal"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ) : aiLoading ? (
-              /* AI Loading Mode takes the full row */
-              <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/25 flex items-center gap-2.5 shadow-lg shadow-indigo-500/5 w-full">
-                <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
-                <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest leading-none">
-                  {aiStatusText || 'AI sedang bekerja...'}
-                </span>
-              </div>
+            {/* Step dots */}
+            <div className="flex items-center gap-1.5">
+              {STEPS.map((_, i) => (
+                <div key={i} className={`h-1 rounded-full transition-all duration-200
+                  ${i === step ? 'w-4 bg-indigo-500' : i < step ? 'w-2 bg-indigo-500/40' : 'w-2 bg-white/[0.08]'}`} />
+              ))}
+            </div>
+
+            {step < 2 ? (
+              <button
+                type="submit"
+                disabled={step === 0 && !formData.title}
+                className="h-9 px-5 rounded text-[12px] font-semibold text-white bg-indigo-500 hover:bg-indigo-400 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              >
+                Lanjut →
+              </button>
             ) : (
-              /* Normal Mode: Voice, Camera, and Simpan in one single row */
-              <div className="flex items-center justify-between gap-2.5 w-full">
-                {/* Voice & Camera buttons on the left */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={startRecording}
-                    className="flex items-center justify-center gap-1.5 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all text-xs font-bold min-w-[44px] min-h-[44px]"
-                  >
-                    <Mic className="w-[18px] h-[18px]" />
-                    <span className="hidden sm:inline">Input Suara</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleImageScanClick}
-                    className="flex items-center justify-center gap-1.5 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all text-xs font-bold min-w-[44px] min-h-[44px]"
-                  >
-                    <Camera className="w-[18px] h-[18px]" />
-                    <span className="hidden sm:inline">Scan Gambar</span>
-                  </button>
-                </div>
-
-                {/* Submit button on the right */}
-                <button
-                  type="submit" disabled={loading}
-                  className="flex items-center justify-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white min-w-[110px] px-6 py-3 rounded-lg text-[13px] font-bold active:scale-95 transition-all disabled:opacity-50 min-h-[44px]"
-                >
-                  {loading ? (
-                    <Loader2 className="animate-spin w-4 h-4" />
-                  ) : (
-                    <span>{filmToEdit ? 'Simpan' : 'Tambah'}</span>
-                  )}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="h-9 px-5 rounded text-[12px] font-semibold text-white bg-indigo-500 hover:bg-indigo-400 transition-colors disabled:opacity-40 flex items-center gap-1.5"
+              >
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {filmToEdit ? 'Simpan' : 'Tambah'}
+              </button>
             )}
           </div>
         </form>

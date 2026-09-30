@@ -15,79 +15,61 @@ interface ToastProps {
 const Toast = ({ message, type, onClose }: ToastProps) => {
   const config = {
     success: {
-      label: 'BERHASIL',
-      icon: (
-        <div className="bg-gradient-to-br from-emerald-400 to-emerald-500 text-white rounded-full p-1 shadow-md shadow-emerald-500/20 flex items-center justify-center">
-          <Check className="w-2.5 h-2.5" strokeWidth={4} />
-        </div>
-      ),
-      borderLeft: 'border-l-emerald-500',
+      icon: <Check className="w-3 h-3 text-emerald-400" strokeWidth={2.5} />,
+      dot: 'bg-emerald-500',
       titleColor: 'text-emerald-400',
-      progressBarBg: 'bg-emerald-500/40'
+      label: 'Berhasil',
     },
     error: {
-      label: 'GAGAL',
-      icon: (
-        <div className="bg-gradient-to-br from-rose-400 to-rose-500 text-white rounded-full p-1 shadow-md shadow-rose-500/20 flex items-center justify-center">
-          <X className="w-2.5 h-2.5" strokeWidth={4} />
-        </div>
-      ),
-      borderLeft: 'border-l-rose-500',
+      icon: <X className="w-3 h-3 text-rose-400" strokeWidth={2.5} />,
+      dot: 'bg-rose-500',
       titleColor: 'text-rose-400',
-      progressBarBg: 'bg-rose-500/40'
+      label: 'Gagal',
     },
     warning: {
-      label: 'PERINGATAN',
-      icon: (
-        <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-full p-1 shadow-md shadow-amber-500/20 flex items-center justify-center">
-          <AlertTriangle className="w-2.5 h-2.5" strokeWidth={3} />
-        </div>
-      ),
-      borderLeft: 'border-l-amber-500',
+      icon: <AlertTriangle className="w-3 h-3 text-amber-400" strokeWidth={2} />,
+      dot: 'bg-amber-500',
       titleColor: 'text-amber-400',
-      progressBarBg: 'bg-amber-500/40'
+      label: 'Peringatan',
     },
     info: {
-      label: 'INFORMASI',
-      icon: (
-        <div className="bg-gradient-to-br from-indigo-400 to-indigo-500 text-white rounded-full p-1 shadow-md shadow-indigo-500/20 flex items-center justify-center">
-          <Info className="w-2.5 h-2.5" strokeWidth={3} />
-        </div>
-      ),
-      borderLeft: 'border-l-indigo-500',
+      icon: <Info className="w-3 h-3 text-indigo-400" strokeWidth={2} />,
+      dot: 'bg-indigo-500',
       titleColor: 'text-indigo-400',
-      progressBarBg: 'bg-indigo-500/40'
+      label: 'Info',
     }
   };
 
-  const { label, icon, borderLeft, titleColor, progressBarBg } = config[type];
+  const { icon, dot, titleColor, label } = config[type];
 
   // Bersihkan karakter emoji mentah di awal pesan agar tidak dobel dengan flat icon
   const cleanMessage = message.replace(/^[\u{1F300}-\u{1F9FF}🌐📴✅❌⚠️✨\s]+/u, '').trim();
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -15, scale: 0.95 }}
+      initial={{ opacity: 0, y: -10, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.15 } }}
-      className={`fixed top-[68px] right-4 sm:top-[76px] sm:right-6 z-[9999] flex items-start gap-2 p-2.5 rounded-lg border border-white/[0.08] bg-[#0b0e17]/95 backdrop-blur-xl shadow-[0_12px_30px_rgba(0,0,0,0.5)] border-l-4 ${borderLeft} w-[240px] overflow-hidden`}
+      exit={{ opacity: 0, y: -8, scale: 0.97, transition: { duration: 0.12 } }}
+      className="fixed top-[68px] right-4 sm:top-[76px] sm:right-6 z-[9999] flex items-start gap-2.5 p-3 bg-[#0c0f1c] border border-white/[0.07] shadow-[0_8px_24px_rgba(0,0,0,0.5)] w-[220px] overflow-hidden"
+      style={{ borderRadius: '6px' }}
     >
+      {/* Icon */}
       <div className="flex-shrink-0 mt-0.5">
         {icon}
       </div>
       
       <div className="flex-1 min-w-0">
-        <span className={`block text-[8px] font-black tracking-widest uppercase mb-0.5 ${titleColor}`}>
+        <span className={`block text-[9px] font-bold tracking-wider uppercase mb-0.5 ${titleColor}`}>
           {label}
         </span>
-        <p className="text-[10px] font-bold text-white/90 leading-tight">
+        <p className="text-[11px] font-medium text-white/85 leading-tight">
           {cleanMessage}
         </p>
       </div>
 
       <button 
         onClick={onClose}
-        className="p-0.5 rounded hover:bg-white/5 text-white/30 hover:text-white transition-colors flex-shrink-0 mt-0.5"
+        className="p-0.5 rounded text-white/20 hover:text-white/60 transition-colors flex-shrink-0 mt-0.5"
         title="Tutup"
       >
         <X size={10} />
@@ -98,7 +80,7 @@ const Toast = ({ message, type, onClose }: ToastProps) => {
         initial={{ scaleX: 1 }}
         animate={{ scaleX: 0 }}
         transition={{ duration: 3, ease: 'linear' }}
-        className={`absolute bottom-0 left-0 h-[2px] w-full origin-left ${progressBarBg}`}
+        className={`absolute bottom-0 left-0 h-[1px] w-full origin-left ${dot} opacity-60`}
       />
     </motion.div>
   );

@@ -31,20 +31,18 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
-  const syncLockRef = useRef(false); // Prevent concurrent syncs
+  const syncLockRef = useRef(false);
 
-  // Update pending count from queue
   const refreshPendingCount = useCallback(() => {
     if (typeof window === 'undefined') return;
     const queue = getOfflineQueue();
     setPendingCount(queue.length);
   }, []);
 
-  // Main sync function
   const triggerSync = useCallback(async (showSyncToast = true): Promise<boolean> => {
     if (typeof window === 'undefined') return false;
-    if (syncLockRef.current) return false; // Already syncing
-    if (!navigator.onLine) return false; // Offline, skip
+    if (syncLockRef.current) return false;
+    if (!navigator.onLine) return false;
 
     const queue = getOfflineQueue();
     if (queue.length === 0) {
@@ -69,17 +67,17 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         refreshPendingCount();
         const syncedCount = queue.length;
         if (syncedCount > 0 && showSyncToast) {
-          showToast(`✅ ${syncedCount} perubahan berhasil disinkronkan!`, 'success');
+          showToast(`${syncedCount} perubahan berhasil disinkronkan`, 'success');
         }
         return true;
       } else {
-        showToast('⚠️ Sebagian data gagal sync, mencoba lagi nanti...', 'error');
+        showToast('Sebagian data gagal sync, mencoba lagi nanti', 'error');
         refreshPendingCount();
         return false;
       }
     } catch (err) {
       console.error('[SyncEngine] Unexpected error:', err);
-      showToast('❌ Sync gagal, periksa koneksi Anda.', 'error');
+      showToast('Sync gagal, periksa koneksi Anda', 'error');
       return false;
     } finally {
       syncLockRef.current = false;
@@ -90,30 +88,29 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Initial count
     refreshPendingCount();
 
-    // Online/offline listeners
     const handleOnline = () => {
       setIsOnline(true);
-      showToast('🌐 Koneksi kembali! Menyinkronkan data...', 'success');
+      showToast('Koneksi kembali, menyinkronkan data', 'success');
       // Small delay to let network stabilize
-      setTimeout(() => triggerSync(), 1500);
+      const t = setTimeout(() => triggerSync(), 1500);
+      return () => clearTimeout(t);
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      showToast('📴 Offline — perubahan akan disimpan lokal', 'error');
+      showToast('Offline — perubahan disimpan lokal', 'info');
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Try sync on mount (in case there are pending items from last session)
-    const mountTimer = setTimeout(() => triggerSync(), 3000);
+    // Try sync on mount — delay to not block initial render
+    const mountTimer = setTimeout(() => triggerSync(false), 4000);
 
     // Periodic sync every 5 minutes
-    const intervalId = setInterval(() => triggerSync(), 5 * 60 * 1000);
+    const intervalId = setInterval(() => triggerSync(false), 5 * 60 * 1000);
 
     return () => {
       window.removeEventListener('online', handleOnline);

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   LogOut, Clapperboard, Search, SlidersHorizontal,
   ChevronDown, User, X, LayoutGrid, List, ArrowLeft, FolderPlus, Link2, Loader2
@@ -59,32 +59,24 @@ function FilterDropdown() {
   return (
     <div ref={ref} className="relative flex-none" data-filter-dropdown>
       <button onClick={() => setOpen(o => !o)}
-        className={`relative flex items-center gap-1.5 md:gap-2 h-7 md:h-8 px-2 md:px-3.5 rounded-md text-[10px] md:text-xs font-medium transition-all duration-200 border ${open
-          ? 'bg-indigo-500/15 border-indigo-500/50 text-indigo-300 shadow-lg shadow-indigo-500/10'
-          : 'bg-white/[0.06] border-white/[0.08] text-gray-300 hover:bg-white/10 hover:border-white/15'
+        className={`relative flex items-center gap-1.5 md:gap-2 h-7 md:h-8 px-2 md:px-3.5 rounded text-[10px] md:text-xs font-medium transition-all duration-200 border ${open
+          ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300'
+          : 'bg-white/[0.04] border-white/[0.07] text-gray-400 hover:bg-white/[0.07] hover:text-gray-200 hover:border-white/[0.1]'
           }`}>
         <SlidersHorizontal className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Filter</span>
         {activeCount > 0 && (
-          <motion.span
-            initial={{ scale: 0 }} animate={{ scale: 1 }}
-            className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center shadow-sm shadow-indigo-500/50"
-          >
+          <span className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-[9px] font-bold rounded w-4 h-4 flex items-center justify-center">
             {activeCount}
-          </motion.span>
+          </span>
         )}
-        <ChevronDown className={`w-3 h-3 opacity-60 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute -right-8 sm:right-0 top-full mt-2.5 w-[250px] md:w-72 z-50 rounded-xl border border-white/[0.08] shadow-2xl shadow-black/60 overflow-hidden origin-top-right sm:origin-top"
-            style={{ background: 'rgba(10,14,30,0.95)', backdropFilter: 'blur(24px)' }}
+      {open && (
+          <div
+            className="absolute right-0 top-full mt-2 w-[260px] md:w-72 max-w-[calc(100vw-24px)] max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-50 rounded-lg border border-white/[0.07] shadow-2xl shadow-black/60"
+            style={{ background: 'rgba(10,14,30,0.97)', backdropFilter: 'blur(16px)' }}
           >
 
             <div className="px-3 py-2.5 md:px-4 md:py-3 space-y-3 md:space-y-3.5">
@@ -108,9 +100,8 @@ function FilterDropdown() {
                 Reset
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -134,31 +125,25 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
   return (
     <div ref={ref} className="relative flex-none">
       <button onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-1.5 md:gap-2 h-7 md:h-8 pl-1.5 pr-2 md:pr-3 rounded-lg border transition-all duration-200 ${open ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-white/[0.06] border-white/[0.08] hover:bg-white/10 hover:border-white/15'
+        className={`flex items-center gap-1.5 md:gap-2 h-7 md:h-8 pl-1.5 pr-2 md:pr-3 rounded border transition-all duration-200 ${open ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/[0.04] border-white/[0.07] hover:bg-white/[0.07] hover:border-white/[0.1]'
           }`}>
         {/* Avatar */}
-        <div className="relative w-5 h-5 rounded-md flex items-center justify-center overflow-hidden"
+        <div className="relative w-5 h-5 rounded flex items-center justify-center overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
           {avatar ? (
             <Image src={avatar} alt="Avatar" width={20} height={20} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-[9px] font-black text-white">{initials}</span>
+            <span className="text-[9px] font-bold text-white">{initials}</span>
           )}
-          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-[#0B1120] z-10" />
         </div>
-        <span className="hidden sm:block text-xs font-semibold text-gray-200">{username}</span>
+        <span className="hidden sm:block text-xs font-medium text-gray-300">{username}</span>
         <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-full mt-2.5 w-[190px] md:w-52 z-50 rounded-lg md:rounded-xl border border-white/[0.08] shadow-2xl shadow-black/60 overflow-hidden"
-            style={{ background: 'rgba(10,14,30,0.92)', backdropFilter: 'blur(24px)' }}
+      {open && (
+          <div
+            className="absolute right-0 top-full mt-2 w-[190px] md:w-52 max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-50 rounded-lg border border-white/[0.07] shadow-2xl shadow-black/60"
+            style={{ background: 'rgba(10,14,30,0.97)', backdropFilter: 'blur(16px)' }}
           >
             {/* Profile card */}
             <div className="px-3 md:px-4 pt-3 md:pt-4 pb-2 md:pb-3 border-b border-white/[0.06]">
@@ -182,29 +167,22 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
 
             {/* Menu */}
             <div className="p-1.5 md:p-2">
-              <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="w-full flex items-center gap-2 md:gap-2.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-xs text-gray-400 hover:bg-white/[0.06] hover:text-gray-100 transition-all duration-150 group">
-                <span className="w-5 h-5 md:w-6 md:h-6 rounded-sm md:rounded-md bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/15 transition-colors">
-                  <User className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                </span>
+              <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="w-full flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded text-[10px] md:text-xs text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-colors duration-150">
+                <User className="w-3.5 h-3.5 text-gray-500" />
                 Profil Saya
               </Link>
-              <Link href="/dashboard/stream" onClick={() => setOpen(false)} className="w-full flex items-center gap-2 md:gap-2.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-xs text-gray-400 hover:bg-white/[0.06] hover:text-gray-100 transition-all duration-150 group mt-0.5">
-                <span className="w-5 h-5 md:w-6 md:h-6 rounded-sm md:rounded-md bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/15 transition-colors">
-                  <Link2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                </span>
+              <Link href="/dashboard/stream" onClick={() => setOpen(false)} className="w-full flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded text-[10px] md:text-xs text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-colors duration-150 mt-0.5">
+                <Link2 className="w-3.5 h-3.5 text-gray-500" />
                 Link Stream
               </Link>
               <button onClick={() => { setOpen(false); onLogout(); }}
-                className="w-full flex items-center gap-2 md:gap-2.5 px-2 md:px-3 py-1.5 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-xs text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-150 group mt-0.5">
-                <span className="w-5 h-5 md:w-6 md:h-6 rounded-sm md:rounded-md bg-white/5 flex items-center justify-center group-hover:bg-red-500/15 transition-colors">
-                  <LogOut className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                </span>
+                className="w-full flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded text-[10px] md:text-xs text-gray-400 hover:bg-red-500/[0.08] hover:text-red-400 transition-colors duration-150 mt-0.5">
+                <LogOut className="w-3.5 h-3.5 text-gray-500" />
                 Keluar
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -282,9 +260,9 @@ function MobileBottomBar({
           const lbl = v.replace('Semua Kategori', 'Semua').replace('Semua Status', 'Semua');
           return (
             <button key={v} onClick={() => onChange(v)}
-              className={`px-3 py-1.5 rounded-md text-[10px] font-semibold transition-all border ${active
-                ? 'bg-indigo-500 border-indigo-500 text-white shadow-sm'
-                : 'bg-white/[0.03] border-white/[0.06] text-gray-400 hover:text-white active:bg-white/[0.08]'
+              className={`px-3 py-1.5 rounded text-[10px] font-medium transition-all border ${active
+                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                : 'bg-white/[0.02] border-white/[0.05] text-gray-500 hover:text-gray-200 hover:bg-white/[0.05]'
               }`}>
               {lbl}
             </button>
@@ -297,18 +275,17 @@ function MobileBottomBar({
   return (
     <div className="md:hidden fixed bottom-5 left-4 right-4 z-[100] max-w-[480px] mx-auto">
       {/* ── Popups ── */}
-      <AnimatePresence>
         {profileOpen && (
           <div
             ref={profileRef}
-            className="absolute bottom-[calc(100%+12px)] left-0 w-60 rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-1.5"
+            className="absolute bottom-[calc(100%+10px)] left-0 w-60 rounded-lg border border-white/[0.07] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-1.5"
           >
             <div className="px-4 py-3.5 border-b border-white/[0.05] flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10"
+              <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 overflow-hidden"
                 style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
                 {avatar
                   ? <Image src={avatar} alt="Avatar" width={32} height={32} className="w-full h-full object-cover" />
-                  : <span className="text-[10px] font-black text-white">{initials}</span>}
+                  : <span className="text-[10px] font-bold text-white">{initials}</span>}
               </div>
               <div className="min-w-0">
                 <p className="text-[12px] font-bold text-white truncate">{username}</p>
@@ -357,7 +334,7 @@ function MobileBottomBar({
         {filterOpen && isDashboard && (
           <div
             ref={filterRef}
-            className="absolute bottom-[calc(100%+12px)] left-0 right-0 rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-5 space-y-4"
+            className="absolute bottom-[calc(100%+10px)] left-0 right-0 max-h-[75vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-lg border border-white/[0.07] shadow-2xl bg-[#090D1A]/95 backdrop-blur-xl p-5 space-y-4"
           >
             <ChipGroup label="Kategori Produk" items={['Semua Kategori','Film','Donghua','Anime','Series']} value={typeFilter} onChange={setTypeFilter} />
             <div className="h-px bg-white/[0.04]" />
@@ -373,10 +350,9 @@ function MobileBottomBar({
             </button>
           </div>
         )}
-      </AnimatePresence>
 
       {/* ── Bottom Navigation Bar ── */}
-      <nav className="relative px-3 py-2 flex items-center justify-between gap-1.5 rounded-xl bg-[#090D1A]/90 backdrop-blur-lg border border-white/[0.08] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.7)]">
+      <nav className="relative px-3 py-2 flex items-center justify-between gap-1.5 rounded-lg bg-[#0a0d1a]/95 backdrop-blur-lg border border-white/[0.07] shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
         
         {/* Tab: Profil */}
         <button
@@ -385,11 +361,7 @@ function MobileBottomBar({
           className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
         >
           {profileOpen && (
-            <motion.div
-              layoutId="activeTabPill"
-              className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded-lg z-0"
-              transition={{ type: "spring", stiffness: 450, damping: 32 }}
-            />
+            <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded z-0" />
           )}
           <div className="relative z-10 flex flex-col items-center">
             <User className={`w-5 h-5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-gray-400'}`} strokeWidth={2} />
@@ -407,11 +379,7 @@ function MobileBottomBar({
             className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
             {filterOpen && (
-              <motion.div
-                layoutId="activeTabPill"
-                className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded-lg z-0"
-                transition={{ type: "spring", stiffness: 450, damping: 32 }}
-              />
+              <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded z-0" />
             )}
             <div className="relative z-10 flex flex-col items-center">
               <div className="relative">
@@ -489,11 +457,7 @@ function MobileBottomBar({
             className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
              {profileOpen && (
-               <motion.div
-                 layoutId="activeTabPill"
-                 className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded-lg z-0"
-                 transition={{ type: "spring", stiffness: 450, damping: 32 }}
-               />
+               <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded z-0" />
              )}
              <div className="relative z-10 flex flex-col items-center">
                <div className="w-5 h-5 rounded-sm overflow-hidden ring-1 ring-white/10" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
@@ -525,19 +489,29 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const { search, setSearch, viewMode, setViewMode } = useFilters();
   const { isOnline, isSyncing, pendingCount } = useSyncEngine();
 
-  // Show header on scroll up, hide on scroll down
+  // Show header on scroll up, hide on scroll down (throttled to state transitions only)
   useEffect(() => {
     let lastScrollY = window.scrollY;
+    let visible = true;
     const handleScroll = () => {
       const currentY = window.scrollY;
-      if (currentY <= 0) {
-        setHeaderVisible(true);
-      } else if (currentY < lastScrollY) {
-        // Scrolling up → show header
-        setHeaderVisible(true);
-      } else if (currentY > lastScrollY + 5) {
-        // Scrolling down (threshold 5px to avoid micro-jitter) → hide header
-        setHeaderVisible(false);
+      if (currentY <= 15) {
+        if (!visible) {
+          visible = true;
+          setHeaderVisible(true);
+        }
+      } else if (currentY < lastScrollY - 6) {
+        // Scrolling up
+        if (!visible) {
+          visible = true;
+          setHeaderVisible(true);
+        }
+      } else if (currentY > lastScrollY + 8) {
+        // Scrolling down
+        if (visible) {
+          visible = false;
+          setHeaderVisible(false);
+        }
       }
       lastScrollY = currentY;
     };
@@ -574,21 +548,12 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className={`bg-[#0B1120] text-white flex flex-col relative selection:bg-indigo-500/30 ${pathname === '/dashboard/profile' ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       <div className="absolute inset-0 overflow-x-hidden pointer-events-none" />
-      <motion.header
-        animate={{
-          y: headerVisible ? 0 : -88,
-          opacity: headerVisible ? 1 : 0,
-        }}
-        initial={{ y: -88, opacity: 0 }}
-        transition={{
-          duration: headerVisible ? 0.55 : 0.7,
-          ease: headerVisible ? [0.16, 1, 0.3, 1] : [0.4, 0, 0.2, 1],
-          opacity: { duration: headerVisible ? 0.4 : 0.6 }
-        }}
-        className="sticky top-0 z-40 w-full border-b border-blue-900/40"
+      <header
+        className="sticky top-0 z-40 w-full border-b border-white/[0.05] transition-transform duration-300"
         style={{
-          background: 'rgba(11,17,32,0.88)',
-          backdropFilter: typeof window !== 'undefined' && window.innerWidth < 768 ? 'blur(8px)' : 'blur(20px)',
+          background: 'rgba(11,17,32,0.9)',
+          backdropFilter: 'blur(16px)',
+          transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
         }}
       >
         <div className="max-w-[1550px] mx-auto px-3 md:px-6">
@@ -596,53 +561,33 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
             {/* ── Logo ── */}
             {isDashboard && (
-              <div className="flex items-center gap-2.5 flex-none group cursor-pointer select-none">
-                <div className="relative p-1.5 rounded-lg transition-all duration-300 group-hover:scale-105"
-                  style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))', border: '1px solid rgba(99,102,241,0.3)' }}>
-                  <motion.div
-                    animate={isSyncing ? {} : { scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
-                    transition={isSyncing 
-                      ? {} 
-                      : { repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                  >
-                    {isSyncing ? (
-                      <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 animate-spin drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-                    ) : (
-                      <Image
-                        src="/listv-logo.png"
-                        alt="ListV Logo"
-                        width={28}
-                        height={28}
-                        className="w-6 h-6 md:w-7 md:h-7 rounded-md object-contain"
-                      />
-                    )}
-                  </motion.div>
-                  
-                  {/* Status dot overlay */}
+              <div className="flex items-center gap-2.5 flex-none cursor-pointer select-none">
+                <div className="relative p-1.5 rounded"
+                  style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                  {isSyncing ? (
+                    <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 animate-spin" />
+                  ) : (
+                    <Image
+                      src="/listv-logo.png"
+                      alt="ListV Logo"
+                      width={28}
+                      height={28}
+                      className="w-6 h-6 md:w-7 md:h-7 rounded object-contain"
+                    />
+                  )}
+                  {/* Status dot */}
                   {!isSyncing && (
                     <span 
-                      className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0b1120] z-20 transition-colors duration-300
-                        ${!isOnline ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : 
-                          pendingCount > 0 ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 
-                          'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} 
+                      className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[#0b1120] z-20 transition-colors duration-300
+                        ${!isOnline ? 'bg-red-500' : 
+                          pendingCount > 0 ? 'bg-amber-500' : 
+                          'bg-emerald-500'}`} 
                      />
                   )}
-                  {/* Glow */}
-                  <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"
-                    style={{ background: 'rgba(99,102,241,0.4)' }} />
                 </div>
-
-                <motion.span
-                  className="block text-[19px] sm:text-[21px] font-black tracking-tight bg-clip-text text-transparent"
-                  style={{
-                    backgroundImage: 'linear-gradient(90deg, #e2e8f0 0%, #a5b4fc 40%, #ffffff 50%, #a5b4fc 60%, #e2e8f0 100%)',
-                    backgroundSize: '200% auto'
-                  }}
-                  animate={{ backgroundPosition: ['200% center', '-200% center'] }}
-                  transition={{ repeat: Infinity, duration: 3.5, ease: "linear" }}
-                >
+                <span className="text-[18px] sm:text-[20px] font-bold tracking-tight text-white">
                   ListV
-                </motion.span>
+                </span>
               </div>
             )}
 
@@ -668,43 +613,34 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                       boxShadow: searchFocused ? '0 0 0 3px rgba(99,102,241,0.08)' : 'none',
                     }}
                   />
-                  <AnimatePresence>
-                    {search && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="absolute right-0 top-0 bottom-0 w-7 flex items-center justify-center"
+                  {search && (
+                      <button
+                        onClick={() => setSearch('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-500 hover:text-white transition-colors"
                       >
-                        <button
-                          onClick={() => setSearch('')}
-                          className="w-4 h-4 flex items-center justify-center rounded-full bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 hover:text-white transition-all duration-200"
-                        >
-                          <X className="w-3 h-3" strokeWidth={2.5} />
-                        </button>
-                      </motion.div>
+                        <X className="w-3 h-3" strokeWidth={2} />
+                      </button>
                     )}
-                  </AnimatePresence>
                 </div>
 
                 {/* ── Spacer ── */}
                 <div className="hidden sm:block flex-1" />
 
                 {/* ── View Toggle (desktop only) ── */}
-                <div className="hidden md:flex bg-white/[0.04] p-0.5 md:p-1 rounded-md border border-white/[0.08] mr-1 md:mr-2">
+                <div className="hidden md:flex bg-white/[0.03] p-0.5 rounded border border-white/[0.06] mr-1 md:mr-2">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-1 md:p-1.5 rounded-sm transition-all ${viewMode === 'list' ? 'bg-indigo-500/20 text-indigo-400 shadow-sm' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
+                    className={`p-1 md:p-1.5 rounded-sm transition-all ${viewMode === 'list' ? 'bg-indigo-500/15 text-indigo-400' : 'text-gray-500 hover:text-gray-300'}`}
                     title="List View"
                   >
-                    <List className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2.5} />
+                    <List className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2} />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-1 md:p-1.5 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-indigo-500/20 text-indigo-400 shadow-sm' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
+                    className={`p-1 md:p-1.5 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-indigo-500/15 text-indigo-400' : 'text-gray-500 hover:text-gray-300'}`}
                     title="Grid View"
                   >
-                    <LayoutGrid className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2.5} />
+                    <LayoutGrid className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2} />
                   </button>
                 </div>
 
@@ -717,7 +653,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
               <div className="flex-1 flex justify-start items-center md:pl-2">
                 <button 
                   onClick={() => router.push('/dashboard')}
-                  className="mr-3 md:mr-4 p-2 rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.1] transition-all text-gray-400 hover:text-white shadow-sm"
+                  className="mr-3 md:mr-4 p-1.5 rounded text-gray-400 hover:text-white hover:bg-white/[0.05] transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
@@ -740,7 +676,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       <main className={`flex-1 w-full relative z-10 ${pathname === '/dashboard/profile' ? 'overflow-hidden p-0' : 'max-w-[1550px] mx-auto px-2 md:px-6 py-3 md:py-6 pb-24 md:pb-6'}`}>
         {children}

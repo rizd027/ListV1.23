@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Eye, EyeOff, Loader2, Clapperboard, User, Lock, Film, PlayCircle, MonitorPlay, Star } from 'lucide-react';
+import { Eye, EyeOff, Loader2, User, Lock } from 'lucide-react';
 import { Outfit } from 'next/font/google';
 import { loginAppScript } from '@/lib/api';
 
@@ -146,36 +146,12 @@ export default function LoginPage() {
 
       {/* 3. Form Content Column (Right on Desktop, Full on Mobile) */}
       <div className="flex-1 w-full lg:w-1/2 relative flex items-center justify-center p-6 lg:p-8 z-20 overflow-y-auto custom-scrollbar lg:bg-transparent">
-        {/* Dynamic Background Icons - Small & Numerous */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-40">
-          {[
-            { Icon: Film, size: 24, pos: { top: '8%', left: '12%' }, d: 0, dur: 8, c: 'text-indigo-500/20' },
-            { Icon: MonitorPlay, size: 28, pos: { top: '15%', right: '15%' }, d: 1, dur: 10, c: 'text-purple-500/20' },
-            { Icon: PlayCircle, size: 20, pos: { top: '35%', left: '5%' }, d: 2, dur: 12, c: 'text-blue-500/20' },
-            { Icon: Star, size: 16, pos: { top: '65%', right: '8%' }, d: 0.5, dur: 9, c: 'text-indigo-400/20' },
-            { Icon: Clapperboard, size: 22, pos: { bottom: '12%', left: '15%' }, d: 1.5, dur: 11, c: 'text-indigo-300/20' },
-            { Icon: Film, size: 18, pos: { top: '50%', right: '20%' }, d: 2.5, dur: 13, c: 'text-purple-300/20' },
-            { Icon: PlayCircle, size: 26, pos: { bottom: '25%', right: '10%' }, d: 0.8, dur: 7, c: 'text-blue-300/20' },
-            { Icon: MonitorPlay, size: 14, pos: { top: '55%', left: '8%' }, d: 3, dur: 15, c: 'text-indigo-400/20' },
-            { Icon: Star, size: 20, pos: { bottom: '45%', left: '22%' }, d: 1.2, dur: 14, c: 'text-purple-400/20' },
-            { Icon: Clapperboard, size: 16, pos: { top: '25%', left: '30%' }, d: 4, dur: 18, c: 'text-indigo-500/10' },
-            { Icon: Film, size: 20, pos: { bottom: '5%', right: '35%' }, d: 0.2, dur: 10, c: 'text-blue-400/10' },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                y: [0, i % 2 === 0 ? -20 : 20, 0],
-                x: [0, i % 3 === 0 ? 15 : -15, 0],
-                rotate: [0, i % 2 === 0 ? 10 : -10, 0]
-              }}
-              transition={{ duration: item.dur, repeat: Infinity, ease: "easeInOut", delay: item.d }}
-              style={item.pos}
-              className={`absolute ${item.c}`}
-            >
-              <item.Icon style={{ width: item.size, height: item.size }} />
-            </motion.div>
-          ))}
-        </div>
+        {/* Subtle grid pattern for depth */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-30"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(99,102,241,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(139,92,246,0.04) 0%, transparent 50%)'
+          }}
+        />
 
         <div className="w-full max-w-[380px] flex flex-col space-y-6 relative z-10">
 
@@ -202,17 +178,17 @@ export default function LoginPage() {
           </motion.div>
 
           {/* Auth Tabs */}
-          <div className="flex p-1 bg-white/5 border border-white/5 rounded-lg">
+          <div className="flex p-0.5 bg-white/[0.03] border border-white/[0.05] rounded">
             <button
               onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }}
-              className={`flex-1 flex items-center justify-center py-2 text-sm font-semibold rounded-md transition-all duration-300 ${isLogin ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25' : 'text-gray-400 hover:text-white'
+              className={`flex-1 flex items-center justify-center py-2 text-sm font-medium rounded-sm transition-all duration-200 ${isLogin ? 'bg-white/[0.07] text-white' : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
               Masuk
             </button>
             <button
               onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }}
-              className={`flex-1 flex items-center justify-center py-2 text-sm font-semibold rounded-md transition-all duration-300 ${!isLogin ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25' : 'text-gray-400 hover:text-white'
+              className={`flex-1 flex items-center justify-center py-2 text-sm font-medium rounded-sm transition-all duration-200 ${!isLogin ? 'bg-white/[0.07] text-white' : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
               Daftar
@@ -254,7 +230,7 @@ export default function LoginPage() {
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase() }))}
-                  className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors"
                   placeholder="Masukkan username"
                 />
               </div>
@@ -270,7 +246,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors"
                   placeholder="Masukkan password"
                 />
                 <button
@@ -298,7 +274,7 @@ export default function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium"
+                      className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors"
                       placeholder="Ulangi password"
                     />
                   </div>
@@ -309,7 +285,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 mt-2 rounded-lg text-sm font-bold text-white shadow-lg flex items-center justify-center transition-all ${loading ? 'bg-indigo-500/70 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 hover:-translate-y-0.5 shadow-indigo-500/25'
+              className={`w-full py-2.5 mt-1 rounded text-sm font-semibold text-white flex items-center justify-center transition-colors ${loading ? 'bg-indigo-500/50 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-400'
                 }`}
             >
               {loading ? (

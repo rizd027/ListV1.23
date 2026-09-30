@@ -1,6 +1,9 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useTransition, Dispatch, SetStateAction } from 'react';
+import {
+  createContext, useContext, useState, useEffect, useRef,
+  ReactNode, useTransition, Dispatch, SetStateAction, useCallback, useMemo
+} from 'react';
 import { Film } from '@/lib/api';
 
 interface FilterState {
@@ -22,12 +25,19 @@ interface FilterState {
   setLoadingFilms: (v: boolean) => void;
   dataFetched: boolean;
   setDataFetched: (v: boolean) => void;
-  isOnline: boolean;
-  isSyncing: boolean;
-  setIsSyncing: (v: boolean) => void;
 }
 
 const FilterContext = createContext<FilterState | null>(null);
+
+// Debounce helper for cache writes
+function useDebounced<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState('');
@@ -39,62 +49,63 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [films, setFilms] = useState<Film[]>([]);
   const [loadingFilms, setLoadingFilms] = useState(true);
   const [dataFetched, setDataFetched] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [, startTransition] = useTransition();
+  const isMounted = useRef(false);
 
+  // Load cache from localStorage once on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsOnline(navigator.onLine);
-      const handleOnline = () => setIsOnline(true);
-      const handleOffline = () => setIsOnline(false);
+    if (typeof window === 'undefined') return;
 
-      window.addEventListener('online', handleOnline);
-      window.addEventListener('offline', handleOffline);
-
-      const cached = localStorage.getItem('film_data_cache');
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.length > 0) {
-            setFilms(parsed);
-            setLoadingFilms(false);
-          }
-        } catch (e) {}
+    const cached = localStorage.getItem('film_data_cache');
+    if (cached) {
+      try {
+        const parsed: Film[] = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setFilms(parsed);
+          setLoadingFilms(false);
+        }
+      } catch {
+        // Corrupt cache — ignore
       }
-
-      return () => {
-        window.removeEventListener('online', handleOnline);
-        window.removeEventListener('offline', handleOffline);
-      };
     }
+    isMounted.current = true;
   }, []);
 
+  // Debounce cache writes — write to localStorage only 1.5s after films settle
+  // This prevents a write on every optimistic update keypress
+  const debouncedFilms = useDebounced(films, 1500);
   useEffect(() => {
-    if (films.length > 0) {
-      localStorage.setItem('film_data_cache', JSON.stringify(films));
+    if (!isMounted.current) return; // Skip the initial hydration write
+    if (debouncedFilms.length > 0) {
+      try {
+        localStorage.setItem('film_data_cache', JSON.stringify(debouncedFilms));
+      } catch {
+        // localStorage full or SSR
+      }
     }
-  }, [films]);
+  }, [debouncedFilms]);
 
-  const setViewMode = (v: 'list' | 'grid') => {
-    startTransition(() => {
-      setViewModeState(v);
-    });
-  };
+  const setViewMode = useCallback((v: 'list' | 'grid') => {
+    startTransition(() => setViewModeState(v));
+  }, [startTransition]);
+
+  const contextValue = useMemo(() => ({
+    search, setSearch,
+    typeFilter, setTypeFilter,
+    sortBy, setSortBy,
+    statusFilter, setStatusFilter,
+    viewMode, setViewMode,
+    addModalOpen, setAddModalOpen,
+    films, setFilms,
+    loadingFilms, setLoadingFilms,
+    dataFetched, setDataFetched,
+  }), [
+    search, typeFilter, sortBy, statusFilter, viewMode, setViewMode,
+    addModalOpen, films, loadingFilms, dataFetched
+  ]);
 
   return (
-    <FilterContext.Provider value={{
-      search, setSearch,
-      typeFilter, setTypeFilter,
-      sortBy, setSortBy,
-      statusFilter, setStatusFilter,
-      viewMode, setViewMode,
-      addModalOpen, setAddModalOpen,
-      films, setFilms,
-      loadingFilms, setLoadingFilms,
-      dataFetched, setDataFetched,
-      isOnline, isSyncing, setIsSyncing
-    }}>
+    <FilterContext.Provider value={contextValue}>
       {children}
     </FilterContext.Provider>
   );

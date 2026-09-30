@@ -1,57 +1,27 @@
 'use client';
 
-import { HTMLMotionProps, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
-interface GlassCardProps extends HTMLMotionProps<"div"> {
+interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
 }
 
+// Simplified GlassCard — pure div, no framer-motion overhead, no resize listener.
+// Motion is handled at page level where needed; card itself is just a styled container.
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ children, className, ...props }, ref) => {
-    const [isMobile, setIsMobile] = React.useState(false);
-
-    React.useEffect(() => {
-      const checkMobile = () => setIsMobile(window.innerWidth < 768);
-      checkMobile();
-      window.addEventListener('resize', checkMobile);
-      return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    if (isMobile) {
-      return (
-        <div
-          ref={ref as any}
-          className={cn(
-            "glass-card rounded-xl p-6 overflow-hidden md:p-8 w-full",
-            className
-          )}
-          {...(props as any)}
-        >
-          {children}
-        </div>
-      );
-    }
-
     return (
-      <motion.div
+      <div
         ref={ref}
-        className={cn(
-          "glass-card rounded-xl p-6 overflow-hidden md:p-8 w-full",
-          className
-        )}
-        initial={undefined}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        className={cn('glass-card rounded-lg overflow-hidden w-full', className)}
         {...props}
       >
         {children}
-      </motion.div>
+      </div>
     );
   }
 );
 
-GlassCard.displayName = "GlassCard";
+GlassCard.displayName = 'GlassCard';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import { useBackInterceptor } from '@/hooks/useBackInterceptor';
 
 interface AlertModalProps {
@@ -36,66 +36,67 @@ export const AlertModal = ({
 
   if (!mounted) return null;
 
-  const confirmColor = type === 'danger'
+  const confirmBg = type === 'danger'
     ? 'bg-rose-600 hover:bg-rose-500'
     : type === 'warning'
     ? 'bg-amber-600 hover:bg-amber-500'
     : 'bg-indigo-600 hover:bg-indigo-500';
 
-  const iconColor = type === 'danger' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500';
+  const iconColor = type === 'danger' ? 'text-rose-400' : 'text-amber-400';
 
   return (
     <div
       className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
       style={{
         pointerEvents: isOpen ? 'auto' : 'none',
-        visibility: isOpen || visible ? 'visible' : 'hidden', // to hide focus correctly
+        visibility: isOpen || visible ? 'visible' : 'hidden',
         transition: 'visibility 0s linear',
-        transitionDelay: isOpen ? '0s' : '0.2s' // delay hide by 200ms when closing
+        transitionDelay: isOpen ? '0s' : '0.2s'
       }}
     >
-      {/* Backdrop — dark only, no blur */}
+      {/* Backdrop */}
       <div
         className="absolute inset-0 transition-opacity duration-200"
-        style={{ background: 'rgba(0,0,0,0.7)', opacity: visible ? 1 : 0 }}
+        style={{ background: 'rgba(0,0,0,0.65)', opacity: visible ? 1 : 0 }}
         onClick={onCancel}
       />
 
       {/* Panel */}
       <div
-        className="relative w-full max-w-[340px] rounded-xl overflow-hidden transition-all duration-200"
+        className="relative w-full max-w-[320px] overflow-hidden transition-all duration-200"
         style={{
           background: '#0f1220',
           border: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: '0 20px 48px rgba(0,0,0,0.7)',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
+          borderRadius: '8px',
           opacity: visible ? 1 : 0,
-          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(8px)',
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(8px)',
         }}
       >
         <button
           onClick={onCancel}
-          className="absolute top-3 right-3 p-1.5 rounded-md text-gray-600 hover:text-white hover:bg-white/[0.06] transition-colors"
+          className="absolute top-3 right-3 p-1.5 rounded text-gray-600 hover:text-white hover:bg-white/[0.05] transition-colors"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
 
         <div className="flex flex-col items-center text-center px-6 pt-8 pb-6">
-          <div className={`p-3.5 rounded-lg mb-4 ${iconColor}`}>
-            <AlertCircle className="w-7 h-7" />
+          <div className={`mb-4 ${iconColor}`}>
+            <AlertTriangle className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-black text-white mb-2">{title}</h3>
-          <p className="text-sm text-gray-400 mb-6 leading-relaxed">{message}</p>
+          <h3 className="text-[15px] font-bold text-white mb-2">{title}</h3>
+          <p className="text-[12px] text-gray-400 mb-6 leading-relaxed">{message}</p>
 
-          <div className="flex w-full gap-2.5">
+          <div className="flex w-full gap-2">
             <button
               onClick={onCancel}
-              className="flex-1 h-10 rounded-lg bg-white/[0.04] border border-white/[0.06] text-sm font-semibold text-gray-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+              className="flex-1 h-9 rounded text-[12px] font-medium text-gray-400 hover:text-white bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors"
             >
               {cancelText}
             </button>
             <button
               onClick={() => { onConfirm(); onCancel(); }}
-              className={`flex-1 h-10 rounded-lg text-sm font-bold text-white transition-colors ${confirmColor}`}
+              className={`flex-1 h-9 rounded text-[12px] font-semibold text-white transition-colors ${confirmBg}`}
             >
               {confirmText}
             </button>
