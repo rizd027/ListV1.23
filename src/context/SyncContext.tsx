@@ -41,8 +41,17 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   const triggerSync = useCallback(async (showSyncToast = true): Promise<boolean> => {
     if (typeof window === 'undefined') return false;
-    if (syncLockRef.current) return false;
     if (!navigator.onLine) return false;
+
+    // Tunggu jika sync sebelumnya masih berlangsung (maksimal 3 detik)
+    if (syncLockRef.current) {
+      let attempts = 0;
+      while (syncLockRef.current && attempts < 6) {
+        await new Promise(r => setTimeout(r, 500));
+        attempts++;
+      }
+      if (syncLockRef.current) return false;
+    }
 
     const queue = getOfflineQueue();
     if (queue.length === 0) {

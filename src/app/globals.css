@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+  --background: #080c18;
+  --foreground: #f8fafc;
 }
 
 *,
@@ -50,11 +50,11 @@ input[type="number"] {
 
 @layer utilities {
   .glass {
-    @apply bg-[#0b1120] border border-white/10 md:bg-glass-gradient md:backdrop-blur-xl md:shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
+    @apply bg-[#0b1224] border border-white/[0.12] md:bg-glass-gradient md:backdrop-blur-xl md:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)];
   }
 
   .glass-card {
-    @apply bg-[#0f172a] border border-white/10 md:bg-dark-800/60 md:backdrop-blur-xl;
+    @apply bg-[#0f172a] border border-white/[0.12] md:bg-dark-800/70 md:backdrop-blur-xl;
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -73,11 +73,9 @@ input[type="number"] {
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background-image: none;
-  @media (min-width: 768px) {
-    background-image:
-      radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
-      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
-  }
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.12), transparent 30%),
+    radial-gradient(circle at 90% 40%, rgba(139, 92, 246, 0.10), transparent 35%),
+    radial-gradient(circle at 50% 85%, rgba(59, 130, 246, 0.08), transparent 30%);
   pointer-events: none;
 }

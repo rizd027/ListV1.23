@@ -37,16 +37,16 @@ function FilterDropdown() {
     label: string; items: string[]; value: string; onChange: (v: string) => void;
   }) => (
     <div>
-      <p className="text-[8px] md:text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-1.5">{label}</p>
-      <div className="flex flex-wrap gap-1">
+      <p className="text-[10px] md:text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
         {items.map(v => {
           const active = value === v;
           const label = v.replace('Semua Kategori', 'Semua').replace('Semua Status', 'Semua');
           return (
             <button key={v} onClick={() => onChange(v)}
-              className={`px-2 py-1 md:px-2.5 md:py-1 rounded-md text-[9px] md:text-[11px] font-medium transition-all duration-150 border ${active
-                ? 'bg-indigo-500/25 border-indigo-500/40 text-indigo-300'
-                : 'bg-white/[0.04] border-white/[0.06] text-gray-500 hover:bg-white/[0.08] hover:text-gray-300 hover:border-white/10'
+              className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-md text-[10px] md:text-xs font-semibold transition-all duration-150 border ${active
+                ? 'bg-indigo-500 text-white border-indigo-400 shadow-sm'
+                : 'bg-[#141c33] border-white/[0.1] text-slate-300 hover:bg-[#1b2544] hover:text-white hover:border-white/[0.2]'
                 }`}>
               {label}
             </button>
@@ -59,45 +59,45 @@ function FilterDropdown() {
   return (
     <div ref={ref} className="relative flex-none" data-filter-dropdown>
       <button onClick={() => setOpen(o => !o)}
-        className={`relative flex items-center gap-1.5 md:gap-2 h-7 md:h-8 px-2 md:px-3.5 rounded text-[10px] md:text-xs font-medium transition-all duration-200 border ${open
-          ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300'
-          : 'bg-white/[0.04] border-white/[0.07] text-gray-400 hover:bg-white/[0.07] hover:text-gray-200 hover:border-white/[0.1]'
+        className={`relative flex items-center gap-1.5 md:gap-2 h-8 md:h-9 px-2.5 md:px-3.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${open
+          ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300'
+          : 'bg-[#11192e] border-white/[0.12] text-slate-200 hover:bg-[#16203a] hover:text-white hover:border-white/[0.2]'
           }`}>
-        <SlidersHorizontal className="w-3.5 h-3.5" />
+        <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
         <span className="hidden sm:inline">Filter</span>
         {activeCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-[9px] font-bold rounded w-4 h-4 flex items-center justify-center">
+          <span className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
             {activeCount}
           </span>
         )}
-        <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
           <div
-            className="absolute right-0 top-full mt-2 w-[260px] md:w-72 max-w-[calc(100vw-24px)] max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-50 rounded-lg border border-white/[0.07] shadow-2xl shadow-black/60"
-            style={{ background: 'rgba(10,14,30,0.97)', backdropFilter: 'blur(16px)' }}
+            className="absolute right-0 top-full mt-2 w-[270px] md:w-80 max-w-[calc(100vw-24px)] max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-50 rounded-xl border border-white/[0.12] shadow-2xl shadow-black/80"
+            style={{ background: '#0d1326', backdropFilter: 'blur(20px)' }}
           >
 
-            <div className="px-3 py-2.5 md:px-4 md:py-3 space-y-3 md:space-y-3.5">
+            <div className="px-3.5 py-3 md:px-4 md:py-3.5 space-y-3.5 md:space-y-4">
               <ChipGroup label="Kategori"
                 items={['Semua Kategori', 'Film', 'Donghua', 'Anime', 'Series']}
                 value={typeFilter} onChange={setTypeFilter} />
-              <div className="h-px bg-white/[0.05]" />
+              <div className="h-px bg-white/[0.08]" />
               <ChipGroup label="Urutan"
                 items={['ID A-Z', 'ID Z-A', 'Judul A-Z', 'Judul Z-A']}
                 value={sortBy} onChange={setSortBy} />
-              <div className="h-px bg-white/[0.05]" />
+              <div className="h-px bg-white/[0.08]" />
               <ChipGroup label="Status"
                 items={['Semua Status', 'Selesai', 'Watching', 'Rencana', 'Ditunda']}
                 value={statusFilter} onChange={setStatusFilter} />
             </div>
 
-            <div className="px-3 py-2 md:px-4 md:py-2 border-t border-white/[0.05] flex justify-end">
+            <div className="px-3.5 py-2.5 md:px-4 md:py-3 border-t border-white/[0.08] flex justify-end">
               <button
                 onClick={() => { setTypeFilter('Semua Kategori'); setSortBy('ID A-Z'); setStatusFilter('Semua Status'); }}
-                className="text-[9px] md:text-[10px] text-gray-600 hover:text-indigo-400 transition-colors font-medium">
-                Reset
+                className="text-[11px] md:text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-bold">
+                Reset Semua Filter
               </button>
             </div>
           </div>
@@ -125,30 +125,30 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
   return (
     <div ref={ref} className="relative flex-none">
       <button onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-1.5 md:gap-2 h-7 md:h-8 pl-1.5 pr-2 md:pr-3 rounded border transition-all duration-200 ${open ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/[0.04] border-white/[0.07] hover:bg-white/[0.07] hover:border-white/[0.1]'
+        className={`flex items-center gap-2 h-8 md:h-9 pl-1.5 pr-2.5 md:pr-3 rounded-lg border transition-all duration-200 ${open ? 'bg-indigo-500/20 border-indigo-500/50' : 'bg-[#11192e] border-white/[0.12] hover:bg-[#16203a] hover:border-white/[0.2]'
           }`}>
         {/* Avatar */}
-        <div className="relative w-5 h-5 rounded flex items-center justify-center overflow-hidden"
+        <div className="relative w-6 h-6 rounded-md flex items-center justify-center overflow-hidden shadow-sm"
           style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
           {avatar ? (
-            <Image src={avatar} alt="Avatar" width={20} height={20} className="w-full h-full object-cover" />
+            <Image src={avatar} alt="Avatar" width={24} height={24} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-[9px] font-bold text-white">{initials}</span>
+            <span className="text-[10px] font-bold text-white">{initials}</span>
           )}
         </div>
-        <span className="hidden sm:block text-xs font-medium text-gray-300">{username}</span>
-        <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <span className="hidden sm:block text-xs font-semibold text-slate-200">{username}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
           <div
-            className="absolute right-0 top-full mt-2 w-[190px] md:w-52 max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-50 rounded-lg border border-white/[0.07] shadow-2xl shadow-black/60"
-            style={{ background: 'rgba(10,14,30,0.97)', backdropFilter: 'blur(16px)' }}
+            className="absolute right-0 top-full mt-2 w-[210px] md:w-56 max-h-[85vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-50 rounded-xl border border-white/[0.12] shadow-2xl shadow-black/80"
+            style={{ background: '#0d1326', backdropFilter: 'blur(20px)' }}
           >
             {/* Profile card */}
-            <div className="px-3 md:px-4 pt-3 md:pt-4 pb-2 md:pb-3 border-b border-white/[0.06]">
+            <div className="px-3.5 md:px-4 pt-3.5 md:pt-4 pb-2.5 md:pb-3 border-b border-white/[0.08]">
               <div className="flex items-center gap-2.5 md:gap-3">
-                <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-md md:rounded-lg flex items-center justify-center flex-none shadow-lg shadow-indigo-500/20 overflow-hidden"
+                <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center flex-none shadow-lg shadow-indigo-500/20 overflow-hidden"
                   style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
                   {avatar ? (
                     <Image src={avatar} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />
@@ -158,7 +158,7 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs md:text-sm font-bold text-white truncate">{username}</p>
-                  <p className="text-[9px] md:text-[10px] text-gray-400 mt-0.5 truncate leading-tight">
+                  <p className="text-[10px] text-slate-300 mt-0.5 truncate leading-tight">
                     {bio || 'Administrator'}
                   </p>
                 </div>
@@ -166,18 +166,19 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
             </div>
 
             {/* Menu */}
-            <div className="p-1.5 md:p-2">
-              <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="w-full flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded text-[10px] md:text-xs text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-colors duration-150">
-                <User className="w-3.5 h-3.5 text-gray-500" />
+            <div className="p-1.5 md:p-2 space-y-0.5">
+              <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="w-full flex items-center gap-2.5 px-2.5 md:px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-white/[0.08] hover:text-white transition-colors duration-150">
+                <User className="w-4 h-4 text-indigo-400" />
                 Profil Saya
               </Link>
-              <Link href="/dashboard/stream" onClick={() => setOpen(false)} className="w-full flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded text-[10px] md:text-xs text-gray-400 hover:bg-white/[0.05] hover:text-gray-200 transition-colors duration-150 mt-0.5">
-                <Link2 className="w-3.5 h-3.5 text-gray-500" />
+              <Link href="/dashboard/stream" onClick={() => setOpen(false)} className="w-full flex items-center gap-2.5 px-2.5 md:px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-white/[0.08] hover:text-white transition-colors duration-150">
+                <Link2 className="w-4 h-4 text-indigo-400" />
                 Link Stream
               </Link>
+              <div className="h-px bg-white/[0.08] my-1 mx-2" />
               <button onClick={() => { setOpen(false); onLogout(); }}
-                className="w-full flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded text-[10px] md:text-xs text-gray-400 hover:bg-red-500/[0.08] hover:text-red-400 transition-colors duration-150 mt-0.5">
-                <LogOut className="w-3.5 h-3.5 text-gray-500" />
+                className="w-full flex items-center gap-2.5 px-2.5 md:px-3 py-2 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 transition-colors duration-150">
+                <LogOut className="w-4 h-4 text-rose-400" />
                 Keluar
               </button>
             </div>
@@ -252,17 +253,17 @@ function MobileBottomBar({
   const ChipGroup = ({ label, items, value, onChange }: {
     label: string; items: string[]; value: string; onChange: (v: string) => void;
   }) => (
-    <div className="space-y-1.5">
-      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{label}</p>
+    <div className="space-y-2">
+      <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">{label}</p>
       <div className="flex flex-wrap gap-1.5">
         {items.map(v => {
           const active = value === v;
           const lbl = v.replace('Semua Kategori', 'Semua').replace('Semua Status', 'Semua');
           return (
             <button key={v} onClick={() => onChange(v)}
-              className={`px-3 py-1.5 rounded text-[10px] font-medium transition-all border ${active
-                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
-                : 'bg-white/[0.02] border-white/[0.05] text-gray-500 hover:text-gray-200 hover:bg-white/[0.05]'
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${active
+                ? 'bg-indigo-500 text-white border-indigo-400 shadow-sm'
+                : 'bg-[#141d35] border-white/[0.1] text-slate-300 hover:text-white hover:bg-[#1c2746]'
               }`}>
               {lbl}
             </button>
@@ -278,30 +279,30 @@ function MobileBottomBar({
         {profileOpen && (
           <div
             ref={profileRef}
-            className="absolute bottom-[calc(100%+10px)] left-0 w-60 rounded-lg border border-white/[0.07] shadow-2xl overflow-hidden bg-[#090D1A]/95 backdrop-blur-xl p-1.5"
+            className="absolute bottom-[calc(100%+10px)] left-0 w-64 rounded-xl border border-white/[0.14] shadow-2xl overflow-hidden bg-[#0d1326]/98 backdrop-blur-2xl p-2"
           >
-            <div className="px-4 py-3.5 border-b border-white/[0.05] flex items-center gap-3">
-              <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 overflow-hidden"
+            <div className="px-3.5 py-3 border-b border-white/[0.08] flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden shadow-md"
                 style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
                 {avatar
-                  ? <Image src={avatar} alt="Avatar" width={32} height={32} className="w-full h-full object-cover" />
-                  : <span className="text-[10px] font-bold text-white">{initials}</span>}
+                  ? <Image src={avatar} alt="Avatar" width={36} height={36} className="w-full h-full object-cover" />
+                  : <span className="text-[11px] font-black text-white">{initials}</span>}
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] font-bold text-white truncate">{username}</p>
-                <p className="text-[9px] text-gray-400 truncate mt-0.5">{bio || 'Premium User'}</p>
+                <p className="text-[13px] font-bold text-white truncate">{username}</p>
+                <p className="text-[10px] text-slate-300 truncate mt-0.5">{bio || 'Premium User'}</p>
               </div>
             </div>
-            <div className="p-1 space-y-0.5">
+            <div className="p-1 space-y-1">
               <button
                 type="button"
                 onClick={() => {
                   setProfileOpen(false);
                   setTimeout(() => router.push('/dashboard/profile'), 120);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-200 hover:bg-white/[0.08] hover:text-white transition-all active:scale-[0.98]"
               >
-                <User className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                <User className="w-4 h-4 text-indigo-400" strokeWidth={2} />
                 Edit Profil
               </button>
               <button
@@ -310,21 +311,21 @@ function MobileBottomBar({
                   setProfileOpen(false);
                   setTimeout(() => router.push('/dashboard/stream'), 120);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-gray-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-200 hover:bg-white/[0.08] hover:text-white transition-all active:scale-[0.98]"
               >
-                <Link2 className="w-4 h-4 text-gray-400" strokeWidth={2} />
+                <Link2 className="w-4 h-4 text-indigo-400" strokeWidth={2} />
                 Link Stream
               </button>
-              <div className="h-px bg-white/[0.05] my-1 mx-2" />
+              <div className="h-px bg-white/[0.08] my-1 mx-2" />
               <button
                 type="button"
                 onClick={() => {
                   setProfileOpen(false);
                   setTimeout(() => onLogout(), 120);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-semibold text-red-400/90 hover:bg-red-500/10 transition-all active:scale-[0.98]"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 transition-all active:scale-[0.98]"
               >
-                <LogOut className="w-4 h-4 text-red-400" strokeWidth={2} />
+                <LogOut className="w-4 h-4 text-rose-400" strokeWidth={2} />
                 Log Keluar
               </button>
             </div>
@@ -334,17 +335,17 @@ function MobileBottomBar({
         {filterOpen && isDashboard && (
           <div
             ref={filterRef}
-            className="absolute bottom-[calc(100%+10px)] left-0 right-0 max-h-[75vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-lg border border-white/[0.07] shadow-2xl bg-[#090D1A]/95 backdrop-blur-xl p-5 space-y-4"
+            className="absolute bottom-[calc(100%+10px)] left-0 right-0 max-h-[75vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-xl border border-white/[0.14] shadow-2xl bg-[#0d1326]/98 backdrop-blur-2xl p-4 md:p-5 space-y-4"
           >
             <ChipGroup label="Kategori Produk" items={['Semua Kategori','Film','Donghua','Anime','Series']} value={typeFilter} onChange={setTypeFilter} />
-            <div className="h-px bg-white/[0.04]" />
+            <div className="h-px bg-white/[0.08]" />
             <ChipGroup label="Urut Berdasarkan" items={['ID A-Z','ID Z-A','Judul A-Z','Judul Z-A']} value={sortBy} onChange={setSortBy} />
-            <div className="h-px bg-white/[0.04]" />
+            <div className="h-px bg-white/[0.08]" />
             <ChipGroup label="Status Nonton" items={['Semua Status','Selesai','Watching','Rencana','Ditunda']} value={statusFilter} onChange={setStatusFilter} />
             
             <button 
               onClick={() => { setTypeFilter('Semua Kategori'); setSortBy('ID A-Z'); setStatusFilter('Semua Status'); setFilterOpen(false); }}
-              className="w-full pt-1.5 text-[10px] font-bold text-indigo-400/80 uppercase tracking-widest text-center hover:text-indigo-400 transition-colors active:scale-95"
+              className="w-full pt-2 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-widest text-center transition-colors active:scale-95"
             >
               Hapus Semua Filter
             </button>
@@ -352,7 +353,7 @@ function MobileBottomBar({
         )}
 
       {/* ── Bottom Navigation Bar ── */}
-      <nav className="relative px-3 py-2 flex items-center justify-between gap-1.5 rounded-lg bg-[#0a0d1a]/95 backdrop-blur-lg border border-white/[0.07] shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+      <nav className="relative px-3 py-2 flex items-center justify-between gap-1.5 rounded-xl bg-[#0a0f1d]/95 backdrop-blur-2xl border border-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
         
         {/* Tab: Profil */}
         <button
@@ -361,11 +362,11 @@ function MobileBottomBar({
           className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
         >
           {profileOpen && (
-            <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded z-0" />
+            <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.08] border border-white/[0.08] rounded-lg z-0" />
           )}
           <div className="relative z-10 flex flex-col items-center">
-            <User className={`w-5 h-5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-gray-400'}`} strokeWidth={2} />
-            <span className={`text-[9px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-gray-500'}`}>
+            <User className={`w-5 h-5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400' : 'text-slate-300'}`} strokeWidth={2} />
+            <span className={`text-[10px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${profileOpen ? 'text-indigo-400 font-bold' : 'text-slate-400'}`}>
               Profil
             </span>
           </div>
@@ -379,18 +380,18 @@ function MobileBottomBar({
             className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
             {filterOpen && (
-              <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.05] border border-white/[0.04] rounded z-0" />
+              <div className="absolute inset-x-1 inset-y-0.5 bg-white/[0.08] border border-white/[0.08] rounded-lg z-0" />
             )}
             <div className="relative z-10 flex flex-col items-center">
               <div className="relative">
-                <SlidersHorizontal className={`w-5 h-5 transition-colors duration-200 ${filterOpen ? 'text-indigo-400' : 'text-gray-400'}`} strokeWidth={2} />
+                <SlidersHorizontal className={`w-5 h-5 transition-colors duration-200 ${filterOpen ? 'text-indigo-400' : 'text-slate-300'}`} strokeWidth={2} />
                 {activeFilterCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-indigo-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center ring-1 ring-[#090D1A]">
                     {activeFilterCount}
                   </span>
                 )}
               </div>
-              <span className={`text-[9px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${filterOpen ? 'text-indigo-400' : 'text-gray-500'}`}>
+              <span className={`text-[10px] font-semibold tracking-wide mt-0.5 transition-colors duration-200 ${filterOpen ? 'text-indigo-400 font-bold' : 'text-slate-400'}`}>
                 Filter
               </span>
             </div>
@@ -404,10 +405,10 @@ function MobileBottomBar({
             className="relative flex-1 flex flex-col items-center justify-center py-1 transition-colors duration-200 active:scale-95"
           >
             <div className="relative z-10 flex flex-col items-center">
-              <div className="p-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <div className="p-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-400">
                 <FolderPlus className="w-5 h-5" strokeWidth={2} />
               </div>
-              <span className="text-[9px] font-semibold tracking-wide mt-0.5 text-indigo-400/90">
+              <span className="text-[10px] font-bold tracking-wide mt-0.5 text-indigo-400">
                 Tambah
               </span>
             </div>
@@ -425,7 +426,7 @@ function MobileBottomBar({
               <div className="relative w-5 h-5 flex items-center justify-center">
                 {/* Grid icon */}
                 <LayoutGrid
-                  className="w-5 h-5 text-gray-400 absolute transition-all duration-200"
+                  className="w-5 h-5 text-slate-300 absolute transition-all duration-200"
                   style={{
                     opacity: localViewMode === 'list' ? 1 : 0,
                     transform: localViewMode === 'list' ? 'rotate(0deg) scale(1)' : 'rotate(90deg) scale(0.6)',
@@ -434,7 +435,7 @@ function MobileBottomBar({
                 />
                 {/* List icon */}
                 <List
-                  className="w-5 h-5 text-gray-400 absolute transition-all duration-200"
+                  className="w-5 h-5 text-slate-300 absolute transition-all duration-200"
                   style={{
                     opacity: localViewMode === 'grid' ? 1 : 0,
                     transform: localViewMode === 'grid' ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.6)',
@@ -442,7 +443,7 @@ function MobileBottomBar({
                   strokeWidth={2}
                 />
               </div>
-              <span className="text-[9px] font-semibold tracking-wide mt-0.5 text-gray-500">
+              <span className="text-[10px] font-semibold tracking-wide mt-0.5 text-slate-400">
                 Layout
               </span>
             </div>
@@ -549,10 +550,10 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className={`bg-[#0B1120] text-white flex flex-col relative selection:bg-indigo-500/30 ${pathname === '/dashboard/profile' ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       <div className="absolute inset-0 overflow-x-hidden pointer-events-none" />
       <header
-        className="sticky top-0 z-40 w-full border-b border-white/[0.05] transition-transform duration-300"
+        className="sticky top-0 z-40 w-full border-b border-white/[0.08] transition-transform duration-300"
         style={{
-          background: 'rgba(11,17,32,0.9)',
-          backdropFilter: 'blur(16px)',
+          background: 'rgba(10,15,29,0.95)',
+          backdropFilter: 'blur(20px)',
           transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
         }}
       >
@@ -562,8 +563,8 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             {/* ── Logo ── */}
             {isDashboard && (
               <div className="flex items-center gap-2.5 flex-none cursor-pointer select-none">
-                <div className="relative p-1.5 rounded"
-                  style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                <div className="relative p-1.5 rounded-lg"
+                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}>
                   {isSyncing ? (
                     <Loader2 className="w-6 h-6 md:w-7 md:h-7 text-indigo-400 animate-spin" />
                   ) : (
@@ -578,14 +579,14 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                   {/* Status dot */}
                   {!isSyncing && (
                     <span 
-                      className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[#0b1120] z-20 transition-colors duration-300
+                      className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0a0f1d] z-20 transition-colors duration-300
                         ${!isOnline ? 'bg-red-500' : 
                           pendingCount > 0 ? 'bg-amber-500' : 
                           'bg-emerald-500'}`} 
                      />
                   )}
                 </div>
-                <span className="text-[18px] sm:text-[20px] font-bold tracking-tight text-white">
+                <span className="text-[18px] sm:text-[20px] font-extrabold tracking-tight text-white">
                   ListV
                 </span>
               </div>
@@ -598,7 +599,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
                 {/* ── Search ── */}
                 <div className={`relative ml-auto flex-1 min-w-[120px] max-w-[170px] transition-all duration-300 sm:max-w-[280px] ${searchFocused ? 'max-w-[230px] sm:max-w-[340px]' : ''}`}>
-                  <Search className={`w-4 h-4 md:w-4.5 md:h-4.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 ${searchFocused ? 'text-indigo-400' : 'text-gray-600'}`} />
+                  <Search className={`w-4 h-4 md:w-4.5 md:h-4.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 ${searchFocused ? 'text-indigo-400' : 'text-slate-400'}`} />
                   <input
                     type="text"
                     placeholder="Cari..."
@@ -606,19 +607,19 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                     onChange={e => setSearch(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
-                    className="w-full h-9 md:h-10 rounded-lg pl-9 p-3 md:pl-10 pr-8 text-xs md:text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
+                    className="w-full h-9 md:h-10 rounded-lg pl-9 p-3 md:pl-10 pr-8 text-xs md:text-sm text-white placeholder:text-slate-400 outline-none transition-all duration-200"
                     style={{
-                      background: searchFocused ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${searchFocused ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.07)'}`,
-                      boxShadow: searchFocused ? '0 0 0 3px rgba(99,102,241,0.08)' : 'none',
+                      background: searchFocused ? 'rgba(99,102,241,0.12)' : '#11192e',
+                      border: `1px solid ${searchFocused ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.14)'}`,
+                      boxShadow: searchFocused ? '0 0 0 3px rgba(99,102,241,0.15)' : 'none',
                     }}
                   />
                   {search && (
                       <button
                         onClick={() => setSearch('')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-gray-500 hover:text-white transition-colors"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
                       >
-                        <X className="w-3 h-3" strokeWidth={2} />
+                        <X className="w-3.5 h-3.5" strokeWidth={2} />
                       </button>
                     )}
                 </div>
@@ -627,20 +628,20 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 <div className="hidden sm:block flex-1" />
 
                 {/* ── View Toggle (desktop only) ── */}
-                <div className="hidden md:flex bg-white/[0.03] p-0.5 rounded border border-white/[0.06] mr-1 md:mr-2">
+                <div className="hidden md:flex bg-[#11192e] p-1 rounded-lg border border-white/[0.12] mr-1 md:mr-2">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-1 md:p-1.5 rounded-sm transition-all ${viewMode === 'list' ? 'bg-indigo-500/15 text-indigo-400' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-indigo-500/25 text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                     title="List View"
                   >
-                    <List className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2} />
+                    <List className="w-3.5 h-3.5" strokeWidth={2} />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-1 md:p-1.5 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-indigo-500/15 text-indigo-400' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-indigo-500/25 text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                     title="Grid View"
                   >
-                    <LayoutGrid className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2} />
+                    <LayoutGrid className="w-3.5 h-3.5" strokeWidth={2} />
                   </button>
                 </div>
 

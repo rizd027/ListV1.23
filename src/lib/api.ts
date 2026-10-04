@@ -67,7 +67,11 @@ export async function saveFilmData(data: any, action: 'add' | 'edit', user: stri
 
   const url = `${CONFIG.SHEET_API_URL}?action=${action}&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`;
   const response = await fetch(url, { method: 'POST', body: formData });
-  return await response.json();
+  const result = await response.json();
+  if (result.status !== 'success') {
+    throw new Error(result.message || 'Gagal menyimpan data ke spreadsheet');
+  }
+  return result;
 }
 
 export async function deleteFilmData(rowIndex: number, user: string, pass: string) {
@@ -76,7 +80,11 @@ export async function deleteFilmData(rowIndex: number, user: string, pass: strin
 
   const url = `${CONFIG.SHEET_API_URL}?action=delete&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`;
   const response = await fetch(url, { method: 'POST', body: formData });
-  return await response.json();
+  const result = await response.json();
+  if (result.status !== 'success') {
+    throw new Error(result.message || 'Gagal menghapus data dari spreadsheet');
+  }
+  return result;
 }
 
 export async function updateUserProfile(user: string, pass: string, newUsername?: string, newPassword?: string, newAvatar?: string) {

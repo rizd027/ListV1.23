@@ -103,6 +103,17 @@ export function pushOfflineAction(newAction: Omit<SyncAction, 'queueId' | 'times
     }
   }
 
+  // Jika ini edit data yang sudah ada di server (punya rowIndex), perbarui data jika sudah ada di antrean
+  if (newAction.type === 'edit' && newAction.rowIndex) {
+    const existingEditIndex = queue.findIndex(q => q.type === 'edit' && q.rowIndex === newAction.rowIndex);
+    if (existingEditIndex !== -1) {
+      queue[existingEditIndex].data = { ...queue[existingEditIndex].data, ...newAction.data };
+      queue[existingEditIndex].timestamp = timestamp;
+      setOfflineQueue(queue);
+      return;
+    }
+  }
+
   if (newAction.type === 'delete' && newAction.tempId && !newAction.rowIndex) {
      // Menghapus data buatan lokal yang belum tersinkron. Batal tambahkan!
      const filteredQueue = queue.filter(q => !(q.type === 'add' && q.data?.id === newAction.tempId));

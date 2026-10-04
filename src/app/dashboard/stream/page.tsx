@@ -205,21 +205,21 @@ export default function StreamPage() {
 
         {/* Search Bar */}
         <div className="w-full relative mb-4 md:mb-5">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             placeholder="Cari platform stream..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 md:h-11 pl-10 pr-4 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 outline-none text-[11px] md:text-xs text-white placeholder:text-gray-500 transition-all shadow-sm"
+            className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#11192e] border border-white/[0.14] hover:border-white/[0.22] focus:border-indigo-400 focus:bg-[#131d36] outline-none text-xs md:text-sm text-white placeholder:text-slate-400 transition-all shadow-sm"
           />
         </div>
 
         {/* List View */}
-        <div className="flex flex-col gap-2 md:gap-3">
+        <div className="flex flex-col gap-2.5 md:gap-3">
           <AnimatePresence>
             {filteredLinks.length === 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-gray-500 text-sm font-medium border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 text-slate-300 text-sm font-semibold border border-dashed border-white/[0.14] rounded-2xl bg-[#0e1528]">
                 {searchQuery ? 'Tidak ada platform yang cocok.' : 'Belum ada data link stream.\nSilakan tekan "Tambah Link" untuk membuat.'}
               </motion.div>
             )}
@@ -235,42 +235,44 @@ export default function StreamPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 transition={{ duration: 0.3, ease: "easeOut", delay: index * 0.04 }}
-                className="group relative flex flex-row items-center gap-2 sm:gap-3 p-2 md:p-3 pr-3 md:pr-4 rounded-xl transition-all duration-300 hover:scale-[1.01] overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] shadow-md hover:shadow-xl hover:shadow-black/40"
+                className="group relative flex flex-row items-center gap-3 sm:gap-4 p-3 md:p-3.5 pr-3 md:pr-4 rounded-xl transition-all duration-200 hover:scale-[1.01] overflow-hidden bg-[#0e1528] border border-white/[0.1] hover:border-indigo-500/40 hover:bg-[#121c35] shadow-md hover:shadow-xl hover:shadow-black/50"
               >
                 {/* Glow Background on hover */}
-                <div className={`absolute inset-0 opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500 bg-gradient-to-r ${link.color}`} />
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-[0.08] transition-opacity duration-300 bg-gradient-to-r ${link.color}`} />
                 
                 {/* Icon Box */}
-                <div className="w-9 h-9 md:w-12 md:h-12 shrink-0 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105"
+                <div className="w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 shadow-md"
                      style={{ background: link.bg, border: `1px solid ${link.border}` }}>
-                  <PlayCircle className="w-4 h-4 md:w-6 md:h-6 text-white/90 group-hover:text-white transition-colors drop-shadow-sm" strokeWidth={1.5} />
+                  <PlayCircle className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-white transition-colors drop-shadow-sm" strokeWidth={1.8} />
                 </div>
                 
                 {/* Info */}
                 <div className="flex-1 min-w-0 pr-1 md:pr-2">
-                  <h3 className="text-[13px] md:text-sm font-bold text-white mb-0.5 truncate">{link.name}</h3>
-                  <div className="flex items-center gap-1 text-[9px] md:text-[11px] text-gray-400 group-hover:text-purple-300 transition-colors">
-                    <Link2 className="w-2.5 h-2.5 shrink-0" />
+                  <h3 className="text-[14px] md:text-base font-bold text-white mb-0.5 truncate group-hover:text-indigo-200 transition-colors">{link.name}</h3>
+                  <div className="flex items-center gap-1.5 text-[11px] md:text-xs text-slate-400 group-hover:text-indigo-300 transition-colors">
+                    <Link2 className="w-3 h-3 shrink-0" />
                     <span className="truncate">{link.url}</span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 md:gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 translate-x-0 sm:translate-x-4 sm:group-hover:translate-x-0">
+                <div className="flex items-center gap-1 md:gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0">
                   <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenModal(link); }}
-                    className="p-1.5 md:p-2 rounded-md bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors"
+                    className="p-2 rounded-lg bg-white/[0.08] hover:bg-white/[0.16] text-slate-200 hover:text-white border border-white/[0.1] transition-colors"
+                    title="Edit Link"
                   >
-                    <Edit2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                    <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={(e) => handleDelete(e, link.id)}
-                    className="p-1.5 md:p-2 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
+                    className="p-2 rounded-lg bg-white/[0.08] hover:bg-rose-500/20 text-slate-200 hover:text-rose-300 border border-white/[0.1] hover:border-rose-500/30 transition-colors"
+                    title="Hapus Link"
                   >
-                    <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
-                  <div className="w-px h-5 bg-white/10 mx-1 hidden sm:block" />
-                  <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-500 group-hover:text-white hidden sm:block transition-colors shrink-0" />
+                  <div className="w-px h-5 bg-white/[0.12] mx-1 hidden sm:block" />
+                  <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-white hidden sm:block transition-colors shrink-0" />
                 </div>
               </motion.a>
             ))}
@@ -287,28 +289,28 @@ export default function StreamPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2 }}
-              className="relative w-full max-w-sm rounded-xl border border-white/[0.08] p-6 shadow-2xl overflow-hidden"
-              style={{ background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(30px)' }}
+              className="relative w-full max-w-sm rounded-2xl border border-white/[0.14] p-6 shadow-2xl overflow-hidden"
+              style={{ background: '#0d1326', backdropFilter: 'blur(30px)' }}
             >
-               <div className="absolute inset-0 border-[2px] border-indigo-500/20 rounded-xl pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, black, transparent)' }} />
+               <div className="absolute inset-0 border-[2px] border-indigo-500/20 rounded-2xl pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, black, transparent)' }} />
               
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-md bg-indigo-500/20 flex items-center justify-center">
+                <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
                     <Link2 className="w-4 h-4 text-indigo-400" />
                   </div>
                   {editingId ? 'Edit Link' : 'Tambah Link'}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.16] text-slate-300 hover:text-white transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -316,31 +318,31 @@ export default function StreamPage() {
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Nama Platform</label>
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">Nama Platform</label>
                   <input
                     type="text"
                     required
                     placeholder="Contoh: Netflix"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full h-11 rounded-lg bg-white/[0.03] border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 px-4 text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
+                    className="w-full h-11 rounded-xl bg-[#131b32] border border-white/[0.14] hover:border-white/[0.22] focus:border-indigo-400 focus:bg-indigo-500/10 px-4 text-sm text-white placeholder:text-slate-400 outline-none transition-all duration-200 font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">URL Tujuan</label>
+                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">URL Tujuan</label>
                   <input
                     type="text"
                     required
                     placeholder="https://..."
                     value={formData.url}
                     onChange={e => setFormData({ ...formData, url: e.target.value })}
-                    className="w-full h-11 rounded-lg bg-white/[0.03] border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 px-4 text-sm text-white placeholder:text-gray-600 outline-none transition-all duration-200"
+                    className="w-full h-11 rounded-xl bg-[#131b32] border border-white/[0.14] hover:border-white/[0.22] focus:border-indigo-400 focus:bg-indigo-500/10 px-4 text-sm text-white placeholder:text-slate-400 outline-none transition-all duration-200 font-medium"
                   />
                 </div>
                 
                 <button
                   type="submit"
-                  className="w-full h-11 mt-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-900/30 active:scale-[0.98]"
+                  className="w-full h-11 mt-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-indigo-900/30 active:scale-[0.98]"
                 >
                   {editingId ? 'Simpan Perubahan' : 'Tambahkan'}
                 </button>

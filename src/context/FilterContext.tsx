@@ -71,11 +71,10 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     isMounted.current = true;
   }, []);
 
-  // Debounce cache writes — write to localStorage only 1.5s after films settle
-  // This prevents a write on every optimistic update keypress
-  const debouncedFilms = useDebounced(films, 1500);
+  // Simpan cache film ke localStorage segera setelah update state
+  const debouncedFilms = useDebounced(films, 200);
   useEffect(() => {
-    if (!isMounted.current) return; // Skip the initial hydration write
+    if (!isMounted.current) return;
     if (debouncedFilms.length > 0) {
       try {
         localStorage.setItem('film_data_cache', JSON.stringify(debouncedFilms));

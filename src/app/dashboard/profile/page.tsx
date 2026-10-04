@@ -277,7 +277,7 @@ export default function ProfilePage() {
               {isEditingBio ? (
                 <input
                   type="text" autoFocus
-                  className="bg-white/5 border-b border-white/20 outline-none text-center text-sm md:text-xs text-gray-300 px-2 py-0.5 w-60 md:w-52 rounded-sm"
+                  className="bg-white/10 border-b border-indigo-400 outline-none text-center text-sm md:text-xs text-white px-2 py-0.5 w-60 md:w-52 rounded-sm"
                   value={newBio}
                   onChange={e => setNewBio(e.target.value)}
                   onBlur={() => { if (!newBio) setNewBio(bio); setIsEditingBio(false); }}
@@ -285,8 +285,8 @@ export default function ProfilePage() {
                 />
               ) : (
                 <div className="flex items-center gap-1.5 cursor-pointer group" onClick={() => setIsEditingBio(true)}>
-                  <span className="text-sm md:text-xs text-gray-500 group-hover:text-gray-300 transition-colors max-w-[220px] md:max-w-[200px] truncate">{bio}</span>
-                  <Pencil className="w-3 h-3 md:w-[10px] md:h-[10px] text-gray-600 group-hover:text-gray-300 transition-colors flex-shrink-0" />
+                  <span className="text-sm md:text-xs text-slate-300 group-hover:text-white transition-colors max-w-[220px] md:max-w-[200px] truncate">{bio}</span>
+                  <Pencil className="w-3 h-3 md:w-[10px] md:h-[10px] text-slate-400 group-hover:text-white transition-colors flex-shrink-0" />
                 </div>
               )}
             </div>
@@ -295,9 +295,9 @@ export default function ProfilePage() {
 
           {/* ── Divider ── */}
           <div className="w-full flex items-center gap-3 flex-shrink-0">
-            <div className="flex-1 h-[1px] bg-white/[0.06]" />
-            <span className="text-[10px] md:text-[9px] font-semibold text-white/30 tracking-[0.15em] uppercase">Keamanan</span>
-            <div className="flex-1 h-[1px] bg-white/[0.06]" />
+            <div className="flex-1 h-[1px] bg-white/[0.1]" />
+            <span className="text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.15em] uppercase">Keamanan</span>
+            <div className="flex-1 h-[1px] bg-white/[0.1]" />
           </div>
 
           {/* ── Password Form ── */}
@@ -305,25 +305,25 @@ export default function ProfilePage() {
             
             {/* Old Password */}
             <div className="w-full">
-              <label className="block text-[11px] md:text-[9px] font-semibold text-white/40 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Sandi Saat Ini</label>
+              <label className="block text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Sandi Saat Ini</label>
               <input
                 type="password"
                 value={oldPassword}
                 placeholder="••••••••"
                 onChange={e => setOldPassword(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-lg h-11 md:h-9 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/15"
+                className="w-full bg-[#131b32] border border-white/[0.14] hover:border-white/[0.22] focus:border-indigo-400 focus:bg-indigo-500/10 rounded-xl h-11 md:h-10 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-slate-400 font-medium"
               />
             </div>
 
             {/* New Password */}
             <div className="w-full">
-              <label className="block text-[11px] md:text-[9px] font-semibold text-white/40 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Kata Sandi Baru</label>
+              <label className="block text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Kata Sandi Baru</label>
               <input
                 type="password"
                 value={newPassword}
                 placeholder="••••••••"
                 onChange={e => setNewPassword(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:bg-indigo-500/5 rounded-lg h-11 md:h-9 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-white/15"
+                className="w-full bg-[#131b32] border border-white/[0.14] hover:border-white/[0.22] focus:border-indigo-400 focus:bg-indigo-500/10 rounded-xl h-11 md:h-10 px-4 text-sm text-white outline-none transition-all duration-200 placeholder:text-slate-400 font-medium"
               />
             </div>
 

@@ -22,18 +22,18 @@ const StatCard = ({
 }) => (
   <button
     onClick={onClick}
-    className={`text-left p-3.5 md:p-4 rounded-lg border transition-colors group
+    className={`text-left p-3.5 md:p-4 rounded-xl border transition-all duration-200 group
       ${isActive
-        ? 'bg-white/[0.04] border-white/[0.12]'
-        : 'bg-[#0c1018] border-white/[0.04] hover:border-white/[0.08] hover:bg-[#0f1520]'
+        ? 'bg-indigo-950/50 border-indigo-500/60 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
+        : 'bg-[#0e1528] border-white/[0.1] hover:border-indigo-500/40 hover:bg-[#121c35]'
       }`}
   >
     <div className="flex items-center justify-between mb-2.5">
-      <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">{label}</span>
-      <Icon className={`w-3.5 h-3.5 ${color} opacity-50`} />
+      <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">{label}</span>
+      <Icon className={`w-4 h-4 ${color} opacity-90`} />
     </div>
-    <p className={`text-2xl md:text-3xl font-bold ${isActive ? 'text-white' : 'text-gray-200'}`}>
-      {loading ? <Loader2 className="w-5 h-5 animate-spin opacity-30" /> : value}
+    <p className="text-2xl md:text-3xl font-extrabold text-white">
+      {loading ? <Loader2 className="w-5 h-5 animate-spin opacity-40 text-indigo-400" /> : value}
     </p>
   </button>
 );
@@ -46,22 +46,24 @@ const GridCard = React.memo(({ film, onEdit, onDelete }: {
 }) => (
   <div
     onClick={() => onEdit(film)}
-    className="relative group flex flex-col bg-[#0c1018] hover:bg-[#0f1520] border border-white/[0.04] hover:border-indigo-500/30 rounded-lg p-4 md:p-5 transition-all overflow-hidden cursor-pointer"
+    className="relative group flex flex-col bg-[#0e1528] hover:bg-[#121c35] border border-white/[0.1] hover:border-indigo-500/50 rounded-xl p-4 md:p-5 transition-all shadow-md hover:shadow-xl hover:shadow-black/50 overflow-hidden cursor-pointer"
   >
     {/* Top row: ID + Actions */}
-    <div className="flex justify-between items-start mb-4">
-      <span className="text-[10px] font-mono text-gray-600">#{film.id}</span>
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-100" onClick={e => e.stopPropagation()}>
+    <div className="flex justify-between items-start mb-3">
+      <span className="text-[10px] font-mono font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded">
+        #{film.id}
+      </span>
+      <div className="flex gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity duration-150" onClick={e => e.stopPropagation()}>
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(film); }}
-          className="p-1.5 text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors rounded"
+          className="p-1.5 text-slate-300 hover:text-white bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.1] transition-colors rounded-md"
           title="Edit"
         >
           <Edit2 className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }}
-          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors rounded"
+          className="p-1.5 text-slate-300 hover:text-rose-300 bg-white/[0.08] hover:bg-rose-500/20 border border-white/[0.1] hover:border-rose-500/30 transition-colors rounded-md"
           title="Hapus"
         >
           <Trash2 className="w-3.5 h-3.5" />
@@ -69,39 +71,41 @@ const GridCard = React.memo(({ film, onEdit, onDelete }: {
       </div>
     </div>
 
-    <h3 className="text-[14px] md:text-[15px] font-semibold text-white group-hover:text-indigo-300 leading-snug line-clamp-2 mb-3 transition-colors">
+    <h3 className="text-[14px] md:text-[15px] font-bold text-white group-hover:text-indigo-200 leading-snug line-clamp-2 mb-3 transition-colors">
       {film.title}
     </h3>
 
     <div className="flex items-center gap-2 mb-3 flex-wrap">
-      <span className="inline-block px-2 py-0.5 text-[10px] font-medium text-gray-400 bg-white/[0.04] border border-white/[0.05] rounded">
+      <span className="inline-block px-2.5 py-0.5 text-[10px] font-semibold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded">
         {film.type}
       </span>
-      <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded border
-        ${film.status === 'Selesai' ? 'text-emerald-400 bg-emerald-500/[0.08] border-emerald-500/20' :
-          film.status === 'Watching' ? 'text-amber-400 bg-amber-500/[0.08] border-amber-500/20' :
-          film.status === 'Rencana' ? 'text-blue-400 bg-blue-500/[0.08] border-blue-500/20' :
-          'text-red-400 bg-red-500/[0.08] border-red-500/20'}`}
+      <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded border
+        ${film.status === 'Selesai' ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/35' :
+          film.status === 'Watching' ? 'text-amber-300 bg-amber-500/15 border-amber-500/35' :
+          film.status === 'Rencana' ? 'text-sky-300 bg-sky-500/15 border-sky-500/35' :
+          'text-rose-300 bg-rose-500/15 border-rose-500/35'}`}
       >
         {film.status}
       </span>
       {film.episodes && (
-        <span className="text-[10px] font-mono text-gray-500">{film.episodes} eps</span>
+        <span className="text-[10px] font-mono font-semibold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
+          {film.episodes} eps
+        </span>
       )}
     </div>
 
     {film.cast && (
-      <p className="text-[11px] text-gray-500 line-clamp-1 mb-2">{film.cast}</p>
+      <p className="text-[12px] text-slate-300 line-clamp-1 mb-2 font-medium">{film.cast}</p>
     )}
 
-    <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/[0.04]">
-      <span className="text-[10px] text-gray-600">{formatDate(film.date)}</span>
+    <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/[0.08]">
+      <span className="text-[11px] font-medium text-slate-400">{formatDate(film.date)}</span>
       {film.link && (
         <a
           href={film.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors"
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-300 hover:text-white bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 px-2.5 py-0.5 rounded transition-colors"
           onClick={e => e.stopPropagation()}
         >
           <LinkIcon className="w-3 h-3" />
@@ -120,48 +124,48 @@ const TableRow = React.memo(({ film, index, onEdit, onDelete }: {
 }) => (
   <tr
     onClick={() => onEdit(film)}
-    className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.03] transition-colors group cursor-pointer"
+    className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.04] transition-colors group cursor-pointer"
   >
-    <td className="px-3 py-3.5 pl-5 text-[11px] font-mono text-gray-600">#{film.id}</td>
+    <td className="px-3 py-3.5 pl-5 text-[11px] font-mono font-bold text-indigo-300">#{film.id}</td>
     <td className="px-3 py-3.5">
-      <span className="text-[13px] font-semibold text-white group-hover:text-indigo-300 line-clamp-1 transition-colors">
+      <span className="text-[13px] font-semibold text-white group-hover:text-indigo-200 line-clamp-1 transition-colors">
         {film.title}
       </span>
     </td>
-    <td className="px-3 py-3.5 text-[11px] text-gray-500 max-w-[180px] truncate" title={film.cast}>{film.cast || '—'}</td>
+    <td className="px-3 py-3.5 text-[12px] text-slate-300 max-w-[180px] truncate font-medium" title={film.cast}>{film.cast || '—'}</td>
     <td className="px-3 py-3.5">
-      <span className="px-2 py-0.5 text-[10px] font-medium text-gray-400 bg-white/[0.04] border border-white/[0.05] rounded">
+      <span className="px-2.5 py-0.5 text-[10px] font-semibold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded">
         {film.type}
       </span>
     </td>
-    <td className="px-3 py-3.5 text-center text-[12px] font-mono text-indigo-400">{film.episodes || '—'}</td>
+    <td className="px-3 py-3.5 text-center text-[12px] font-mono font-bold text-indigo-300">{film.episodes || '—'}</td>
     <td className="px-3 py-3.5">
-      <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase border rounded
-        ${film.status === 'Selesai' ? 'bg-emerald-500/[0.08] text-emerald-400 border-emerald-500/20' :
-          film.status === 'Watching' ? 'bg-amber-500/[0.08] text-amber-400 border-amber-500/20' :
-          film.status === 'Rencana' ? 'bg-blue-500/[0.08] text-blue-400 border-blue-500/20' :
-          'bg-red-500/[0.08] text-red-400 border-red-500/20'}`}
+      <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase border rounded
+        ${film.status === 'Selesai' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35' :
+          film.status === 'Watching' ? 'bg-amber-500/15 text-amber-300 border-amber-500/35' :
+          film.status === 'Rencana' ? 'bg-sky-500/15 text-sky-300 border-sky-500/35' :
+          'bg-rose-500/15 text-rose-300 border-rose-500/35'}`}
       >
         {film.status}
       </span>
     </td>
-    <td className="px-3 py-3.5 text-[11px] text-gray-500">{formatDate(film.date)}</td>
+    <td className="px-3 py-3.5 text-[11px] font-medium text-slate-400">{formatDate(film.date)}</td>
     <td className="px-3 py-3.5 text-center" onClick={e => e.stopPropagation()}>
       {film.link ? (
         <a href={film.link} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center justify-center w-6 h-6 text-indigo-400 hover:text-indigo-300 rounded transition-colors"
+          className="inline-flex items-center justify-center w-7 h-7 text-indigo-300 hover:text-white bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 rounded transition-colors"
           title="Buka link"
         >
-          <LinkIcon className="w-3 h-3" />
+          <LinkIcon className="w-3.5 h-3.5" />
         </a>
-      ) : <span className="text-gray-700">—</span>}
+      ) : <span className="text-slate-600">—</span>}
     </td>
     <td className="px-3 py-3.5 pr-5 text-right" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
-        <button onClick={(e) => { e.stopPropagation(); onEdit(film); }} className="p-1.5 text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors rounded" title="Edit">
+      <div className="flex items-center justify-end gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <button onClick={(e) => { e.stopPropagation(); onEdit(film); }} className="p-1.5 text-slate-300 hover:text-white bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.1] transition-colors rounded-md" title="Edit">
           <Edit2 className="w-3.5 h-3.5" />
         </button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors rounded" title="Hapus">
+        <button onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }} className="p-1.5 text-slate-300 hover:text-rose-300 bg-white/[0.08] hover:bg-rose-500/20 border border-white/[0.1] hover:border-rose-500/30 transition-colors rounded-md" title="Hapus">
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -341,16 +345,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Data View */}
-      <div className={`overflow-hidden ${viewMode === 'grid' ? '' : 'bg-[#0c1018] border border-white/[0.04] rounded-lg'}`}>
+      <div className={`overflow-hidden ${viewMode === 'grid' ? '' : 'bg-[#0e1528] border border-white/[0.1] rounded-xl shadow-lg'}`}>
         {loadingFilms ? (
-          <div className="flex justify-center items-center py-20 gap-2.5 text-gray-600 text-sm">
-            <Loader2 className="animate-spin w-4 h-4" />
+          <div className="flex justify-center items-center py-20 gap-3 text-slate-300 text-sm font-semibold">
+            <Loader2 className="animate-spin w-5 h-5 text-indigo-400" />
             Memuat data...
           </div>
         ) : filteredData.length === 0 ? (
-          <div className="text-center py-20 text-gray-600">
-            <FilmIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
-            <p className="text-sm font-medium">Tidak ada data ditemukan</p>
+          <div className="text-center py-20 text-slate-400">
+            <FilmIcon className="w-12 h-12 mx-auto mb-3 text-indigo-400/40" />
+            <p className="text-base font-semibold text-slate-200">Tidak ada data ditemukan</p>
+            <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian atau filter Anda</p>
           </div>
         ) : viewMode === 'grid' ? (
           <>
@@ -362,8 +367,8 @@ export default function DashboardPage() {
             {visibleCount < filteredData.length && (
               <div className="flex justify-center py-6">
                 <button onClick={() => setVisibleCount(p => p + ITEMS_PER_PAGE)}
-                  className="flex items-center gap-2 px-5 py-2 text-[11px] font-medium text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] rounded transition-colors">
-                  Tampilkan lebih banyak <ChevronDown className="w-3.5 h-3.5" />
+                  className="flex items-center gap-2 px-6 py-2.5 text-[12px] font-semibold text-slate-200 hover:text-white bg-[#131b32] hover:bg-[#1a2544] border border-white/[0.14] rounded-xl shadow-sm transition-all duration-200 active:scale-98">
+                  Tampilkan lebih banyak <ChevronDown className="w-4 h-4 text-indigo-400" />
                 </button>
               </div>
             )}
@@ -373,9 +378,9 @@ export default function DashboardPage() {
             <div className="overflow-x-auto w-full pb-8">
               <table className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="border-b border-white/[0.05] text-gray-600 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                  <tr className="border-b border-white/[0.1] bg-white/[0.04] text-slate-200 text-[11px] font-bold uppercase tracking-[0.12em]">
                     {['ID','JUDUL','CAST','TIPE','EPS','STATUS','TANGGAL','LINK','AKSI'].map((h, i) => (
-                      <th key={h} className={`px-3 py-3 ${i === 0 ? 'pl-5' : ''} ${i === 8 ? 'text-right pr-5' : ''} ${i === 4 ? 'text-center' : ''}`}>{h}</th>
+                      <th key={h} className={`px-3 py-3.5 ${i === 0 ? 'pl-5' : ''} ${i === 8 ? 'text-right pr-5' : ''} ${i === 4 ? 'text-center' : ''}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -389,8 +394,8 @@ export default function DashboardPage() {
             {visibleCount < filteredData.length && (
               <div className="flex justify-center py-6">
                 <button onClick={() => setVisibleCount(p => p + ITEMS_PER_PAGE)}
-                  className="flex items-center gap-2 px-5 py-2 text-[11px] font-medium text-gray-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] rounded transition-colors">
-                  Tampilkan lebih banyak <ChevronDown className="w-3.5 h-3.5" />
+                  className="flex items-center gap-2 px-6 py-2.5 text-[12px] font-semibold text-slate-200 hover:text-white bg-[#131b32] hover:bg-[#1a2544] border border-white/[0.14] rounded-xl shadow-sm transition-all duration-200 active:scale-98">
+                  Tampilkan lebih banyak <ChevronDown className="w-4 h-4 text-indigo-400" />
                 </button>
               </div>
             )}
