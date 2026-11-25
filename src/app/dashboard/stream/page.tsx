@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlayCircle, ExternalLink, MonitorPlay, Sparkles, Plus, Trash2, Edit2, X, Link2, Search, Film, Tv, Video, Clapperboard } from 'lucide-react';
+import { PlayCircle, ExternalLink, MonitorPlay, Sparkles, Plus, Trash2, Edit2, X, Link2, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
+import { AlertModal } from '@/components/ui/AlertModal';
 
 interface StreamLink {
   id: string;
@@ -41,6 +42,16 @@ export default function StreamPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', url: '' });
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsModalOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
 
   useEffect(() => {
     const user = localStorage.getItem('film_username');
@@ -115,11 +126,15 @@ export default function StreamPage() {
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm('Apakah Anda yakin ingin menghapus link ini?')) {
-      const newLinks = links.filter(l => l.id !== id);
-      saveLinks(newLinks);
-      showToast('Link berhasil dihapus!', 'success');
-    }
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    const newLinks = links.filter(l => l.id !== deleteId);
+    saveLinks(newLinks);
+    showToast('Link berhasil dihapus', 'success');
+    setDeleteId(null);
   };
 
   const filteredLinks = links.filter(l => 
@@ -135,45 +150,6 @@ export default function StreamPage() {
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px]" />
         <div className="absolute top-[20%] right-[-10%] w-[30%] h-[50%] bg-purple-600/10 rounded-full blur-[120px]" />
-        
-        {/* Dynamic Background Icons */}
-        <div className="absolute inset-0 opacity-[0.03]">
-          {(typeof window !== 'undefined' && window.innerWidth < 768 ? [...Array(4)] : [...Array(12)]).map((_, i) => {
-            const IconList = [PlayCircle, Film, Tv, MonitorPlay, Video, Clapperboard, Link2];
-            const Icon = IconList[i % IconList.length];
-            const top = (i * 25 + 10) % 100;
-            const left = (i * 30 + 15) % 100;
-            const duration = 20 + (i % 5) * 5;
-            const delay = i * 1;
-            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
-            return (
-              <motion.div
-                key={i}
-                className="absolute text-indigo-400"
-                style={{ top: `${top}%`, left: `${left}%` }}
-                animate={isMobile ? {
-                  y: [0, -20, 0],
-                  opacity: [0.15, 0.3, 0.15],
-                } : {
-                  y: [0, -30, 0],
-                  x: [0, 20, 0],
-                  rotate: [0, 15, -15, 0],
-                  opacity: [0.2, 0.5, 0.2],
-                  scale: [1, 1.1, 1],
-                }}
-                transition={{
-                  duration: isMobile ? duration * 1.5 : duration,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay,
-                }}
-              >
-                <Icon size={isMobile ? 24 : 30 + (i % 3) * 15} />
-              </motion.div>
-            );
-          })}
-        </div>
       </div>
 
       <div className="w-full max-w-3xl flex-1 flex flex-col pt-1 md:pt-4 pb-24 px-2 sm:px-4 relative z-10">
@@ -205,9 +181,10 @@ export default function StreamPage() {
 
         {/* Search Bar */}
         <div className="w-full relative mb-4 md:mb-5">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
+            aria-label="Cari platform stream"
             placeholder="Cari platform stream..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -256,18 +233,22 @@ export default function StreamPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 md:gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0">
+                <div className="flex items-center gap-1 md:gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-all duration-200 translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0 sm:group-focus-within:translate-x-0">
                   <button
+                    type="button"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleOpenModal(link); }}
                     className="p-2 rounded-lg bg-white/[0.08] hover:bg-white/[0.16] text-slate-200 hover:text-white border border-white/[0.1] transition-colors"
                     title="Edit Link"
+                    aria-label={`Edit ${link.name}`}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
+                    type="button"
                     onClick={(e) => handleDelete(e, link.id)}
                     className="p-2 rounded-lg bg-white/[0.08] hover:bg-rose-500/20 text-slate-200 hover:text-rose-300 border border-white/[0.1] hover:border-rose-500/30 transition-colors"
                     title="Hapus Link"
+                    aria-label={`Hapus ${link.name}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -283,7 +264,12 @@ export default function StreamPage() {
       {/* Modal Tambah/Edit */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="stream-modal-title"
+            className="fixed inset-0 z-[150] flex items-center justify-center px-4"
+          >
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -302,13 +288,15 @@ export default function StreamPage() {
                <div className="absolute inset-0 border-[2px] border-indigo-500/20 rounded-2xl pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, black, transparent)' }} />
               
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
+                <h2 id="stream-modal-title" className="text-lg font-bold text-white flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
                     <Link2 className="w-4 h-4 text-indigo-400" />
                   </div>
                   {editingId ? 'Edit Link' : 'Tambah Link'}
                 </h2>
                 <button
+                  type="button"
+                  aria-label="Tutup modal"
                   onClick={() => setIsModalOpen(false)}
                   className="p-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.16] text-slate-300 hover:text-white transition-colors"
                 >
@@ -318,8 +306,9 @@ export default function StreamPage() {
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">Nama Platform</label>
+                  <label htmlFor="stream-name" className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">Nama Platform</label>
                   <input
+                    id="stream-name"
                     type="text"
                     required
                     placeholder="Contoh: Netflix"
@@ -329,8 +318,9 @@ export default function StreamPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">URL Tujuan</label>
+                  <label htmlFor="stream-url" className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">URL Tujuan</label>
                   <input
+                    id="stream-url"
                     type="text"
                     required
                     placeholder="https://..."
@@ -351,6 +341,16 @@ export default function StreamPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <AlertModal
+        isOpen={Boolean(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={confirmDelete}
+        title="Hapus Link?"
+        message="Link stream ini akan dihapus permanen dari daftar."
+        confirmText="Hapus"
+        type="danger"
+      />
     </div>
   );
 }

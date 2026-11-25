@@ -82,6 +82,8 @@ function CustomSelect({ value, onChange, options, icon: Icon }: CustomSelectProp
       <button
         type="button"
         onClick={handleToggle}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         className="w-full flex items-center justify-between bg-[#13192f] border border-white/[0.14] hover:border-white/[0.25] rounded pl-9 pr-3 py-2 text-[12px] text-white focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/40 transition-all font-medium"
       >
         <span className="absolute left-3 top-1/2 -translate-y-1/2">
@@ -507,15 +509,19 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
     }
   }, [filmToEdit, isOpen]);
 
-  // Lock body scroll when open
+  // Lock body scroll & close on Escape when open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
+    if (!isOpen) return;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
       document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -594,7 +600,12 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center sm:p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="film-modal-title"
+      className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center sm:p-4"
+    >
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-full h-full sm:h-auto sm:max-w-[540px] z-10">
@@ -612,12 +623,13 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
         >
           {/* ── Header ── */}
           <div className="flex-none px-5 py-3.5 border-b border-white/[0.08] flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-white tracking-tight">
+            <h2 id="film-modal-title" className="text-[14px] font-bold text-white tracking-tight">
               {filmToEdit ? 'Edit Koleksi' : 'Tambah Koleksi'}
             </h2>
             <button
               type="button"
               onClick={onClose}
+              aria-label="Tutup modal"
               className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors"
             >
               <X className="w-4 h-4" />
@@ -628,13 +640,14 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
           <div className="flex-1 px-5 py-4 space-y-3.5 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* Row 1: Judul Koleksi */}
             <div>
-              <label className={labelCls}>Judul Koleksi <span className="text-rose-400">*</span></label>
+              <label htmlFor="film-title" className={labelCls}>Judul Koleksi <span className="text-rose-400">*</span></label>
               <div className="relative">
                 <Clapperboard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400 pointer-events-none" />
                 <input
+                  id="film-title"
                   required
                   type="text"
-                  placeholder="Judul anime/donghua..."
+                  placeholder="Judul film, anime, atau donghua"
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   className={inputCls}
@@ -828,6 +841,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                     <button
                       type="button"
                       onClick={stopRecording}
+                      aria-label="Hentikan rekaman dan proses"
                       className="p-1.5 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 rounded transition-colors"
                     >
                       <Square className="w-3.5 h-3.5 fill-emerald-300" />
@@ -835,6 +849,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
                     <button
                       type="button"
                       onClick={cancelRecording}
+                      aria-label="Batalkan rekaman"
                       className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.08] rounded transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -844,7 +859,7 @@ export function FilmModal({ isOpen, onClose, filmToEdit, onSuccess }: FilmModalP
               ) : aiLoading ? (
                 <div className="flex items-center gap-2 px-3 py-2 border border-indigo-500/30 bg-indigo-500/10 rounded">
                   <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin flex-none" />
-                  <span className="text-[11px] text-indigo-200 font-medium">{aiStatusText || 'AI sedang bekerja...'}</span>
+                  <span className="text-[11px] text-indigo-200 font-medium">{aiStatusText || 'Memproses dengan AI...'}</span>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">

@@ -58,7 +58,12 @@ function FilterDropdown() {
 
   return (
     <div ref={ref} className="relative flex-none" data-filter-dropdown>
-      <button onClick={() => setOpen(o => !o)}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label="Filter koleksi"
         className={`relative flex items-center gap-1.5 md:gap-2 h-8 md:h-9 px-2.5 md:px-3.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${open
           ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300'
           : 'bg-[#11192e] border-white/[0.12] text-slate-200 hover:bg-[#16203a] hover:text-white hover:border-white/[0.2]'
@@ -124,7 +129,12 @@ function UserDropdown({ username, avatar, bio, onLogout }: { username: string; a
 
   return (
     <div ref={ref} className="relative flex-none">
-      <button onClick={() => setOpen(o => !o)}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label={`Menu akun ${username}`}
         className={`flex items-center gap-2 h-8 md:h-9 pl-1.5 pr-2.5 md:pr-3 rounded-lg border transition-all duration-200 ${open ? 'bg-indigo-500/20 border-indigo-500/50' : 'bg-[#11192e] border-white/[0.12] hover:bg-[#16203a] hover:border-white/[0.2]'
           }`}>
         {/* Avatar */}
@@ -303,7 +313,7 @@ function MobileBottomBar({
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-200 hover:bg-white/[0.08] hover:text-white transition-all active:scale-[0.98]"
               >
                 <User className="w-4 h-4 text-indigo-400" strokeWidth={2} />
-                Edit Profil
+                Profil Saya
               </button>
               <button
                 type="button"
@@ -326,7 +336,7 @@ function MobileBottomBar({
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 transition-all active:scale-[0.98]"
               >
                 <LogOut className="w-4 h-4 text-rose-400" strokeWidth={2} />
-                Log Keluar
+                Keluar
               </button>
             </div>
           </div>
@@ -602,6 +612,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                   <Search className={`w-4 h-4 md:w-4.5 md:h-4.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 ${searchFocused ? 'text-indigo-400' : 'text-slate-400'}`} />
                   <input
                     type="text"
+                    aria-label="Cari koleksi"
                     placeholder="Cari..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
@@ -616,6 +627,8 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                   />
                   {search && (
                       <button
+                        type="button"
+                        aria-label="Hapus pencarian"
                         onClick={() => setSearch('')}
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
                       >
@@ -630,16 +643,22 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 {/* ── View Toggle (desktop only) ── */}
                 <div className="hidden md:flex bg-[#11192e] p-1 rounded-lg border border-white/[0.12] mr-1 md:mr-2">
                   <button
+                    type="button"
+                    aria-label="Tampilan List"
+                    aria-pressed={viewMode === 'list'}
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-indigo-500/25 text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
-                    title="List View"
+                    title="Tampilan List"
                   >
                     <List className="w-3.5 h-3.5" strokeWidth={2} />
                   </button>
                   <button
+                    type="button"
+                    aria-label="Tampilan Grid"
+                    aria-pressed={viewMode === 'grid'}
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-indigo-500/25 text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
-                    title="Grid View"
+                    title="Tampilan Grid"
                   >
                     <LayoutGrid className="w-3.5 h-3.5" strokeWidth={2} />
                   </button>
@@ -652,7 +671,9 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
               </>
             ) : (pathname === '/dashboard/profile' || pathname === '/dashboard/stream') ? (
               <div className="flex-1 flex justify-start items-center md:pl-2">
-                <button 
+                <button
+                  type="button"
+                  aria-label="Kembali ke dashboard"
                   onClick={() => router.push('/dashboard')}
                   className="mr-3 md:mr-4 p-1.5 rounded text-gray-400 hover:text-white hover:bg-white/[0.05] transition-colors"
                 >

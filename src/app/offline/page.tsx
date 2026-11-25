@@ -122,9 +122,9 @@ export default function OfflinePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.7 }}
-          className="text-xs text-gray-600"
+          className="text-xs text-slate-400"
         >
-          Halaman akan otomatis refresh saat koneksi kembali.
+          Halaman akan dimuat ulang otomatis saat koneksi kembali.
         </motion.p>
       </div>
     </main>

@@ -26,6 +26,15 @@ export const AlertModal = ({
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onCancel]);
+
+  useEffect(() => {
     if (isOpen) {
       const t = setTimeout(() => setVisible(true), 10);
       return () => clearTimeout(t);
@@ -46,6 +55,10 @@ export const AlertModal = ({
 
   return (
     <div
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="alert-modal-title"
+      aria-describedby="alert-modal-desc"
       className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
       style={{
         pointerEvents: isOpen ? 'auto' : 'none',
@@ -74,7 +87,9 @@ export const AlertModal = ({
         }}
       >
         <button
+          type="button"
           onClick={onCancel}
+          aria-label="Tutup dialog"
           className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors"
         >
           <X className="w-4 h-4" />
@@ -84,17 +99,19 @@ export const AlertModal = ({
           <div className={`mb-4 ${iconColor} p-3 rounded-full bg-white/[0.04] border border-white/[0.08]`}>
             <AlertTriangle className="w-8 h-8" />
           </div>
-          <h3 className="text-base font-bold text-white mb-2">{title}</h3>
-          <p className="text-[13px] text-slate-300 mb-6 leading-relaxed">{message}</p>
+          <h3 id="alert-modal-title" className="text-base font-bold text-white mb-2">{title}</h3>
+          <p id="alert-modal-desc" className="text-[13px] text-slate-300 mb-6 leading-relaxed">{message}</p>
 
           <div className="flex w-full gap-2.5">
             <button
+              type="button"
               onClick={onCancel}
               className="flex-1 h-10 rounded-xl text-[13px] font-semibold text-slate-200 hover:text-white bg-[#141c33] border border-white/[0.12] hover:bg-[#1a2544] transition-colors"
             >
               {cancelText}
             </button>
             <button
+              type="button"
               onClick={() => { onConfirm(); onCancel(); }}
               className={`flex-1 h-10 rounded-xl text-[13px] font-bold text-white transition-all shadow-md active:scale-95 ${confirmBg}`}
             >

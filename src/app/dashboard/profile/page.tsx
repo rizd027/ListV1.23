@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import NextImage from 'next/image';
-import { Pencil, Camera, Loader2, Save, Shield, Film, Tv, MonitorPlay, Video, Clapperboard } from 'lucide-react';
+import { Pencil, Camera, Loader2, Save, Shield } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { updateUserProfile } from '@/lib/api';
 
@@ -134,7 +134,7 @@ export default function ProfilePage() {
       const res = await updateUserProfile(username, currentPass, nUser, nPass, avatar);
 
       if (res.status === 'success') {
-        showToast('Berhasil di-Simpan!', 'success');
+        showToast('Profil berhasil disimpan', 'success');
 
         if (nUser) {
           localStorage.setItem('film_username', nUser);
@@ -172,41 +172,6 @@ export default function ProfilePage() {
       
       {/* ── Panel Kiri: Profile Editor ── */}
       <div className="w-full md:w-[300px] lg:w-[320px] xl:w-[340px] flex-none bg-[#080a12] border-r border-white/[0.06] flex flex-col overflow-hidden relative z-20">
-        
-        {/* Dynamic Background Icons */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-0">
-          {[...Array(10)].map((_, i) => {
-            const IconList = [Film, Tv, MonitorPlay, Video, Clapperboard];
-            const Icon = IconList[i % IconList.length];
-            const top = (i * 15 + 7) % 100;
-            const left = (i * 23 + 13) % 100;
-            const duration = 15 + (i % 5) * 5;
-            const delay = i * 0.7;
-
-            return (
-              <motion.div
-                key={i}
-                className="absolute text-indigo-400"
-                style={{ top: `${top}%`, left: `${left}%` }}
-                animate={{
-                  y: [0, -40, 0],
-                  x: [0, 20, 0],
-                  rotate: [0, 15, -15, 0],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay,
-                }}
-              >
-                <Icon size={40 + (i % 3) * 20} />
-              </motion.div>
-            );
-          })}
-        </div>
-        
         {/* Subtle top accent line */}
         <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent flex-shrink-0" />
 
@@ -227,21 +192,23 @@ export default function ProfilePage() {
             {/* Avatar with glow ring */}
             <div className="relative mb-5 md:mb-4">
               <div className="absolute -inset-[5px] md:-inset-[4px] rounded-full bg-gradient-to-br from-indigo-500/60 via-purple-500/30 to-transparent blur-sm" />
-              <div
-                className="relative w-[130px] h-[130px] md:w-[110px] md:h-[110px] rounded-full overflow-hidden cursor-pointer group shadow-xl border-2 border-white/5"
+              <button
+                type="button"
+                aria-label="Ubah foto profil"
+                className="relative w-[130px] h-[130px] md:w-[110px] md:h-[110px] rounded-full overflow-hidden cursor-pointer group shadow-xl border-2 border-white/5 block"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {avatar ? (
-                  <NextImage src={avatar} alt="Avatar" width={110} height={110} className="w-full h-full object-cover" />
+                  <NextImage src={avatar} alt="Foto profil" width={110} height={110} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl md:text-3xl font-black bg-gradient-to-br from-indigo-900 to-slate-900 text-indigo-200">
                     {initials}
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 backdrop-blur-[1px]">
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 flex items-center justify-center transition-all duration-300 backdrop-blur-[1px]">
                   <Camera className="w-7 h-7 md:w-6 md:h-6 text-white" />
                 </div>
-              </div>
+              </button>
               <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleAvatarSelect} />
               
               {/* Online status node */}
@@ -305,9 +272,11 @@ export default function ProfilePage() {
             
             {/* Old Password */}
             <div className="w-full">
-              <label className="block text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Sandi Saat Ini</label>
+              <label htmlFor="profile-old-password" className="block text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Sandi Saat Ini</label>
               <input
+                id="profile-old-password"
                 type="password"
+                autoComplete="current-password"
                 value={oldPassword}
                 placeholder="••••••••"
                 onChange={e => setOldPassword(e.target.value)}
@@ -317,9 +286,11 @@ export default function ProfilePage() {
 
             {/* New Password */}
             <div className="w-full">
-              <label className="block text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Kata Sandi Baru</label>
+              <label htmlFor="profile-new-password" className="block text-[11px] md:text-[10px] font-bold text-slate-300 tracking-[0.12em] uppercase mb-2 md:mb-1.5 pl-1">Kata Sandi Baru</label>
               <input
+                id="profile-new-password"
                 type="password"
+                autoComplete="new-password"
                 value={newPassword}
                 placeholder="••••••••"
                 onChange={e => setNewPassword(e.target.value)}
@@ -348,7 +319,7 @@ export default function ProfilePage() {
 
           {/* ── Footer ── */}
           <div className="flex-shrink-0">
-            <p className="text-[9px] text-white/15 text-center tracking-wider">ListV · Profil Aman Terenkripsi</p>
+            <p className="text-[10px] text-slate-400 text-center tracking-wider">ListV · Pengaturan Profil</p>
           </div>
 
         </div>
@@ -360,7 +331,7 @@ export default function ProfilePage() {
           <motion.img
             key={currentSlide}
             src={slides[currentSlide]}
-            alt="Cinematic Background"
+            alt="Latar belakang sinema"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 0.5, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -368,40 +339,6 @@ export default function ProfilePage() {
             className="absolute inset-0 w-full h-full object-cover"
           />
         </AnimatePresence>
-        
-        {/* Dynamic Background Icons (Right Panel) */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-0">
-          {[...Array(8)].map((_, i) => {
-            const IconList = [Film, Tv, MonitorPlay, Video, Clapperboard];
-            const Icon = IconList[(i + 2) % IconList.length];
-            const top = (i * 20 + 10) % 100;
-            const left = (i * 30 + 20) % 100;
-            const duration = 20 + (i % 4) * 5;
-            const delay = i * 0.5;
-
-            return (
-              <motion.div
-                key={i}
-                className="absolute text-white"
-                style={{ top: `${top}%`, left: `${left}%` }}
-                animate={{
-                  y: [0, 60, 0],
-                  x: [0, -30, 0],
-                  rotate: [0, -20, 20, 0],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay,
-                }}
-              >
-                <Icon size={100 + (i % 2) * 50} />
-              </motion.div>
-            );
-          })}
-        </div>
         
         {/* Vignette */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#080a12] via-transparent to-black/50" />
@@ -415,7 +352,7 @@ export default function ProfilePage() {
             transition={{ delay: 0.2, duration: 1 }}
             className="text-4xl lg:text-5xl xl:text-7xl font-black text-white tracking-widest drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
           >
-            Slideshow Gambar
+            Koleksi Tontonan
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -423,7 +360,7 @@ export default function ProfilePage() {
             transition={{ delay: 0.8, duration: 1 }}
             className="text-xs lg:text-sm text-gray-300 mt-4 tracking-[0.3em] uppercase font-bold"
           >
-            Film · Animasi · Sinema
+            Film · Anime · Donghua
           </motion.p>
         </div>
       </div>

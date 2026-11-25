@@ -9,7 +9,6 @@ import { Outfit } from 'next/font/google';
 import { loginAppScript } from '@/lib/api';
 
 const outfit = Outfit({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
-const MotionImage = motion(Image);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -101,19 +100,23 @@ export default function LoginPage() {
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden bg-black/20">
         <div className="absolute inset-0 z-0">
           <AnimatePresence mode='wait'>
-            <MotionImage
+            <motion.div
               key={currentImageIndex}
-              src={`/assets/PNG_Preview/a${currentImageIndex}.png`}
-              alt="Preview"
-              width={1000}
-              height={1000}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              priority
-            />
+              className="absolute inset-0"
+            >
+              <Image
+                src={`/assets/PNG_Preview/a${currentImageIndex}.png`}
+                alt="Preview koleksi"
+                width={1000}
+                height={1000}
+                className="w-full h-full object-cover object-center"
+                priority={currentImageIndex === 1}
+              />
+            </motion.div>
           </AnimatePresence>
         </div>
         {/* Desktop Gradient Overlay to blend with form side */}
@@ -126,18 +129,22 @@ export default function LoginPage() {
       <div className="lg:hidden absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-40">
            <AnimatePresence>
-            <MotionImage
+            <motion.div
               key={currentImageIndex}
-              src={`/assets/PNG_Preview/a${currentImageIndex}.png`}
-              alt="Background"
-              width={500}
-              height={500}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-            />
+              className="absolute inset-0"
+            >
+              <Image
+                src={`/assets/PNG_Preview/a${currentImageIndex}.png`}
+                alt=""
+                width={500}
+                height={500}
+                className="w-full h-full object-cover object-center"
+              />
+            </motion.div>
           </AnimatePresence>
         </div>
         {/* Mobile Dark Overlay for better contrast */}
@@ -173,22 +180,28 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold tracking-tight text-white">ListV</h1>
             </div>
             <p className="text-gray-400 text-[13px] leading-snug px-4">
-              Kelola koleksi Film & Donghua Anda dengan mudah.
+              Kelola daftar tontonan Film dan Donghua.
             </p>
           </motion.div>
 
           {/* Auth Tabs */}
-          <div className="flex p-0.5 bg-white/[0.03] border border-white/[0.05] rounded">
+          <div className="flex p-0.5 bg-white/[0.03] border border-white/[0.05] rounded" role="tablist" aria-label="Mode autentikasi">
             <button
+              type="button"
+              role="tab"
+              aria-selected={isLogin}
               onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }}
-              className={`flex-1 flex items-center justify-center py-2 text-sm font-medium rounded-sm transition-all duration-200 ${isLogin ? 'bg-white/[0.07] text-white' : 'text-gray-500 hover:text-gray-300'
+              className={`flex-1 flex items-center justify-center py-2 text-sm font-medium rounded-sm transition-all duration-200 ${isLogin ? 'bg-white/[0.07] text-white' : 'text-gray-400 hover:text-gray-200'
                 }`}
             >
               Masuk
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={!isLogin}
               onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }}
-              className={`flex-1 flex items-center justify-center py-2 text-sm font-medium rounded-sm transition-all duration-200 ${!isLogin ? 'bg-white/[0.07] text-white' : 'text-gray-500 hover:text-gray-300'
+              className={`flex-1 flex items-center justify-center py-2 text-sm font-medium rounded-sm transition-all duration-200 ${!isLogin ? 'bg-white/[0.07] text-white' : 'text-gray-400 hover:text-gray-200'
                 }`}
             >
               Daftar
@@ -200,6 +213,7 @@ export default function LoginPage() {
             <AnimatePresence mode="wait">
               {error && (
                 <motion.div
+                  role="alert"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
@@ -210,6 +224,8 @@ export default function LoginPage() {
               )}
               {success && (
                 <motion.div
+                  role="status"
+                  aria-live="polite"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
@@ -221,37 +237,42 @@ export default function LoginPage() {
             </AnimatePresence>
 
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-gray-300 ml-1">
+              <label htmlFor="auth-username" className="text-[13px] font-semibold text-gray-300 ml-1">
                 {isLogin ? 'Username' : 'Username Baru'}
               </label>
               <div className="relative flex items-center">
-                <User className="absolute left-3.5 w-4 h-4 text-gray-400" />
+                <User className="absolute left-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
                 <input
+                  id="auth-username"
                   type="text"
+                  autoComplete="username"
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase() }))}
-                  className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors"
+                  className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/40 transition-colors"
                   placeholder="Masukkan username"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-gray-300 ml-1">
+              <label htmlFor="auth-password" className="text-[13px] font-semibold text-gray-300 ml-1">
                 {isLogin ? 'Password' : 'Password Baru'}
               </label>
               <div className="relative flex items-center">
-                <Lock className="absolute left-3.5 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
                 <input
+                  id="auth-password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors"
+                  className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/40 transition-colors"
                   placeholder="Masukkan password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
                   className="absolute right-3.5 text-gray-400 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -267,14 +288,16 @@ export default function LoginPage() {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-1.5"
                 >
-                  <label className="text-[13px] font-semibold text-gray-300 ml-1">Konfirmasi Password</label>
+                  <label htmlFor="auth-confirm-password" className="text-[13px] font-semibold text-gray-300 ml-1">Konfirmasi Password</label>
                   <div className="relative flex items-center">
-                    <Lock className="absolute left-3.5 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3.5 w-4 h-4 text-gray-400 pointer-events-none" />
                     <input
+                      id="auth-confirm-password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/40 transition-colors"
+                      className="w-full bg-[#0d1020] border border-white/[0.07] rounded pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/40 transition-colors"
                       placeholder="Ulangi password"
                     />
                   </div>

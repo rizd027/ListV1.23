@@ -21,6 +21,8 @@ const StatCard = ({
   onClick: () => void;
 }) => (
   <button
+    type="button"
+    aria-pressed={isActive}
     onClick={onClick}
     className={`text-left p-3.5 md:p-4 rounded-xl border transition-all duration-200 group
       ${isActive
@@ -53,18 +55,22 @@ const GridCard = React.memo(({ film, onEdit, onDelete }: {
       <span className="text-[10px] font-mono font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded">
         #{film.id}
       </span>
-      <div className="flex gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity duration-150" onClick={e => e.stopPropagation()}>
+      <div className="flex gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150" onClick={e => e.stopPropagation()}>
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onEdit(film); }}
           className="p-1.5 text-slate-300 hover:text-white bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.1] transition-colors rounded-md"
           title="Edit"
+          aria-label={`Edit ${film.title}`}
         >
           <Edit2 className="w-3.5 h-3.5" />
         </button>
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }}
           className="p-1.5 text-slate-300 hover:text-rose-300 bg-white/[0.08] hover:bg-rose-500/20 border border-white/[0.1] hover:border-rose-500/30 transition-colors rounded-md"
           title="Hapus"
+          aria-label={`Hapus ${film.title}`}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -161,11 +167,11 @@ const TableRow = React.memo(({ film, index, onEdit, onDelete }: {
       ) : <span className="text-slate-600">—</span>}
     </td>
     <td className="px-3 py-3.5 pr-5 text-right" onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-end gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-        <button onClick={(e) => { e.stopPropagation(); onEdit(film); }} className="p-1.5 text-slate-300 hover:text-white bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.1] transition-colors rounded-md" title="Edit">
+      <div className="flex items-center justify-end gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
+        <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(film); }} className="p-1.5 text-slate-300 hover:text-white bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.1] transition-colors rounded-md" title="Edit" aria-label={`Edit ${film.title}`}>
           <Edit2 className="w-3.5 h-3.5" />
         </button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }} className="p-1.5 text-slate-300 hover:text-rose-300 bg-white/[0.08] hover:bg-rose-500/20 border border-white/[0.1] hover:border-rose-500/30 transition-colors rounded-md" title="Hapus">
+        <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(film.rowIndex, film.id); }} className="p-1.5 text-slate-300 hover:text-rose-300 bg-white/[0.08] hover:bg-rose-500/20 border border-white/[0.1] hover:border-rose-500/30 transition-colors rounded-md" title="Hapus" aria-label={`Hapus ${film.title}`}>
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -415,7 +421,7 @@ export default function DashboardPage() {
         onCancel={() => setIsAlertOpen(false)}
         onConfirm={confirmDelete}
         title="Hapus Film?"
-        message="Tindakan ini tidak dapat dibatalkan. Film akan dihapus permanen dari koleksi Anda."
+        message="Film ini akan dihapus permanen dari koleksi."
         confirmText="Hapus"
         type="danger"
       />
@@ -423,9 +429,11 @@ export default function DashboardPage() {
       {/* FAB — desktop only */}
       <div ref={dragRef} className="fixed inset-0 pointer-events-none z-40 hidden md:block" />
       <button
+        type="button"
         className="hidden md:flex fixed bottom-6 right-6 z-[45] items-center justify-center w-12 h-12 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white shadow-[0_4px_20px_rgba(99,102,241,0.35)] pointer-events-auto transition-colors duration-150"
         onClick={() => { setEditingFilm(null); setIsModalOpen(true); }}
         title="Tambah Koleksi Baru"
+        aria-label="Tambah Koleksi Baru"
       >
         <Plus className="w-5 h-5" strokeWidth={2} />
       </button>
